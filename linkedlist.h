@@ -1,6 +1,6 @@
 //#define NULL 0
 typedef char *DATA; //this is just a string
-
+#include "queue.h" //include the queue structure within this file 
 
 struct linkNode
 {
@@ -9,8 +9,8 @@ struct linkNode
 	int flop_num; //this is used for floating point numbers from benchmark
 	int integer_num; //this is used for integer bearing benchmarks
 	int combined_benchmark; //this is used for the combined benchmark scores
-	struct node *next; //recursive node left
-	struct node *returnToFirst; //recursive node right
+	struct linkNode *next; //recursive node left
+	struct linkNode *returnToFirst; //recursive node right
 
 	};
 

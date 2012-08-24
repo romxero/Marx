@@ -9,7 +9,13 @@
 #include <errno.h>
 #include <syslog.h>
 #include <string.h>
- 
+#include <jemalloc/jemalloc.h> //this is experimental right here replace the original malloc
+
+/*Define Constant Macros */
+
+#define appName "Marx" //application name
+
+#define appVers ".01" //alpha version 
 
 #include "tree.h" // this is for the binary ~ non cascade!! 
 //~ #include "linkedlist.h" // this is for the linked list data stuff ~ Deprecated, linkedlists structure is included in tree.h!!
@@ -103,8 +109,11 @@ int main(int argc, char **argv)
 							{
 								
 								
+								/*This below is really for debugging */
 								
-							   puts("Hello\n"); //this is used to debug the messages
+							   puts(appName); //this is used to debug the messages
+							   puts(" Is the best application ever!\n"); //hahaha
+							   
 							//infinite loop
 							
 							
