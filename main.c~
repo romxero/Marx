@@ -12,7 +12,7 @@
  
 
 #include "tree.h" // this is for the binary ~ non cascade!! 
-//~ #include "linkedlist.h" // this is for the linked list data stuff ~ Deprecated, linkedlists structure is included in tree.h!!
+#include "linkedlist.h" // this is for the linked list data stuff
 
 
 
@@ -88,10 +88,10 @@ int main(int argc, char **argv)
 					/* Log any failure here */
 					exit(EXIT_FAILURE);
 					}
-					//closes the standard display stuff
+					
 					/* Close out the standard file descriptors */
 					close(STDIN_FILENO);
-					//close(STDOUT_FILENO); //standard output
+					//close(STDOUT_FILENO);
 					close(STDERR_FILENO);
 					
 						
@@ -101,14 +101,9 @@ int main(int argc, char **argv)
 							
 							while(1)
 							{
-								
-								
-								
-							   puts("Hello\n"); //this is used to debug the messages
+							   puts("Hello\n");
 							//infinite loop
-							
-							
-							sleep(5); // make sure to sleep.. 5 takes a bunch of cpu hahaha	
+							sleep(15); // make sure to sleep	
 							}
 							//~this is where execution begins
 							//proper way for a binary tree

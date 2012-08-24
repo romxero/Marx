@@ -1,10 +1,14 @@
 //#define NULL 0
-typedef char *DATA; //this is where the data is located at..
+typedef char *DATA; //this is just a string
 
 
 struct linkNode
 {
 	DATA name; //data member in node
+	DATA ip_address; //this is used for the ip addressing
+	int flop_num; //this is used for floating point numbers from benchmark
+	int integer_num; //this is used for integer bearing benchmarks
+	int combined_benchmark; //this is used for the combined benchmark scores
 	struct node *next; //recursive node left
 	struct node *returnToFirst; //recursive node right
 
