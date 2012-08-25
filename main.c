@@ -10,6 +10,9 @@
 #include <syslog.h>
 #include <string.h>
 #include <jemalloc/jemalloc.h> //this is experimental right here replace the original malloc
+#include <sys/types.h> 
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 /*Define Constant Macros */
 
@@ -54,7 +57,11 @@ int main(int argc, char **argv)
 				
 					int pipefd[2]; //this is used to pipe information to this process, most likely control signals
 					pid_t pid, sid, cpid; // this is the pid for our daemon process
-					
+					int sockfd, newsockfd, portno; //for socket return values
+					socklen_t clilen; //socket structures
+					char buffer[256]; //character buffer for sockets
+					struct sockaddr_in serv_addr, cli_addr;
+					int n;
 					char buf; //misc buffer
 					if (pipe(pipefd) < 0) 
 						{
