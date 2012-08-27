@@ -1,4 +1,8 @@
-//CREATED BY RANDY WHITE
+/*Created by Randy White
+ * CIS 049
+ * 8/25/2012
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,18 +13,24 @@
 #include <errno.h>
 #include <syslog.h>
 #include <string.h>
-#include <jemalloc/jemalloc.h> //this is experimental right here replace the original malloc
+#include <jemalloc/jemalloc.h> //this is experimental right here replace the original malloc ~ might cause dependencie issues
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <linux/futex.h>
+#include <sys/time.h>
+
+
+#include "tree.h" // this is for the binary ~ non cascade!! 
+#include "etc_functions.h" // this is for the binary ~ non cascade!! 
 
 /*Define Constant Macros */
 
 #define appName "Marx" //application name
-
 #define appVers ".01" //alpha version 
+#define maxConnections 1024 // this will be used for the maximum connections to this server
+#define maxThreads 64 //might increase depending on the processor
 
-#include "tree.h" // this is for the binary ~ non cascade!! 
 //~ #include "linkedlist.h" // this is for the linked list data stuff ~ Deprecated, linkedlists structure is included in tree.h!!
 
 
@@ -32,7 +42,7 @@
 
 typedef unsigned int uint; 
 
-
+//maybe I should take out the pointer of pointer parmeter in main function
 int main(int argc, char **argv)
 {
 
@@ -43,7 +53,7 @@ int main(int argc, char **argv)
 				fprintf(stderr, "Usage: %s <string>\n", argv[0]);
             
 
-				printf( "\n\n\n\n\n"); 
+				printf( "\n\n\n"); 
 				printf( "This program takes to commands issued\n"); 
 				printf( "%s : param0\n",argv[0]); 
 					exit(EXIT_FAILURE); //this will exit the application
@@ -75,6 +85,8 @@ int main(int argc, char **argv)
 					if(pid < 0)
 					{
 						printf("ERROR!\n");
+						quitWithError("Could not get a PID for child process"); //new way to handle errors
+
 						exit(EXIT_FAILURE); // exit, things have failed
 					}
 					
@@ -93,6 +105,7 @@ int main(int argc, char **argv)
 					if(sid < 0)
 					{
 						printf("ERROR!\n");
+						quitWithError("Could not get a SID for child process"); //new way to handle errors
 						exit(EXIT_FAILURE); // exit, things have failed
 					}
 					
@@ -108,23 +121,18 @@ int main(int argc, char **argv)
 					close(STDERR_FILENO);
 					
 						
-							//~ root->name = argv[1]; //pass the string through the parmeter 
-							//~ root0->name = argv[1]; //pass the string through the parmeter 
-							
-							
 							while(1)
 							{
 								
 								
 								/*This below is really for debugging */
 								
-							   puts(appName); //this is used to debug the messages
-							   puts(" Is the best application ever!\n"); //hahaha
+							   printf("%s Is the best application ever!\n",appName); //this is used to debug the messages
+							   //~ puts(" Is the best application ever!\n"); //hahaha
 							   
-							//infinite loop
 							
 							
-							sleep(5); // make sure to sleep.. 5 takes a bunch of cpu hahaha	
+								sleep(5); // make sure to sleep.. 5 takes a bunch of cpu hahaha	
 							}
 							//~this is where execution begins
 							//proper way for a binary tree
