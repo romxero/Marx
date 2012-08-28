@@ -1,1 +1,3 @@
-Marx is a distributed job scheduler that utilizes a daemon process
+Marx is a distributed job scheduler that uses a binary tree to load 
+balance scheduled jobs accross a network of nodes. Marx is created in C 
+and is expected to be highly scalable.

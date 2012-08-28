@@ -13,7 +13,8 @@
 #include <errno.h>
 #include <syslog.h>
 #include <string.h>
-#include <jemalloc/jemalloc.h> //this is experimental right here replace the original malloc ~ might cause dependencie issues
+//#include <jemalloc/jemalloc.h> //this is experimental right here 
+//replace the original malloc ~ might cause dependencie issues
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -40,7 +41,7 @@
 
 
 
-typedef unsigned int uint; 
+typedef unsigned int uint; //use this for an unsigned interger
 
 //maybe I should take out the pointer of pointer parmeter in main function
 int main(int argc, char **argv)
