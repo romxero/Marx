@@ -31,6 +31,7 @@
 #define appVers ".01" //alpha version 
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
+#define portNum 3009 //this is the default port number for the process
 
 //~ #include "linkedlist.h" // this is for the linked list data stuff ~ Deprecated, linkedlists structure is included in tree.h!!
 
@@ -66,7 +67,7 @@ int main(int argc, char **argv)
 			{
 
 				
-					int pipefd[2]; //this is used to pipe information to this process, most likely control signals
+					
 					pid_t pid, sid, cpid; // this is the pid for our daemon process
 					int sockfd, newsockfd, portno; //for socket return values
 					socklen_t clilen; //socket structures
@@ -74,11 +75,7 @@ int main(int argc, char **argv)
 					struct sockaddr_in serv_addr, cli_addr;
 					int n;
 					char buf; //misc buffer
-					if (pipe(pipefd) < 0) 
-						{
-						perror("pipe"); //what the hell is this lol
-						exit(EXIT_FAILURE); //exit on failure
-						}
+					
 
 
 					pid = fork(); //fork the proceess to a child process
@@ -121,7 +118,49 @@ int main(int argc, char **argv)
 					//close(STDOUT_FILENO); //standard output
 					close(STDERR_FILENO);
 					
-						
+					
+					/* socket stuff goes here */
+					
+							sockfd = socket(AF_INET, SOCK_STREAM, 0); //this sets up the socket structure for TCP connections
+								if (sockfd < 0)
+								{
+								quitWithError("ERROR opening socket");
+								}
+								bzero((char *) &serv_addr, sizeof(serv_addr)); //initiates a server buffer to zero
+								//~ portno = atoi(argv[1]); //just here for reference.. the atio() function converts a string to an integer
+								portno = portNum; //this is the port number
+								serv_addr.sin_family = AF_INET; //sets the server address as a TCP socket
+								serv_addr.sin_port = htons(portno); //sets the port number of the 
+								if (bind(sockfd, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) //binds a socket to an address
+								{
+									quitWithError("ERROR on binding");
+								}
+								/* Main loop begins below */ 
+								
+								listen(sockfd,5); //allows this process to listen on this socket
+								clilen = sizeof(cli_addr);
+								newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+								
+							if (newsockfd < 0)
+							{
+							quitWithError("ERROR on accept");
+							}
+							bzero(buffer,256);
+							n = read(newsockfd,buffer,255);
+							if (n < 0)
+							{
+							 quitWithError("ERROR reading from socket");
+							}
+							else
+							{
+							printf("Here is the message: %s",buffer);
+							}
+							
+							n = write(newsockfd,"I got your message",18);
+							if (n < 0)
+							{
+							 error("ERROR writing to socket");
+							}							
 							while(1)
 							{
 								
@@ -136,25 +175,7 @@ int main(int argc, char **argv)
 								sleep(5); // make sure to sleep.. 5 takes a bunch of cpu hahaha	
 							}
 							//~this is where execution begins
-							//proper way for a binary tree
-							BTREE root = returnTreeMem(); //new wrapper function that will return a malloc of tree memory-- only 1 element				
-							LLIST root0 = returnLListMem(); //these should be encapsulated
-						
-							//redo this right here and add something cool ... 
-							
-							
-							addBtreeValue(root,argv[1]);
-							addLListValue(root0,argv[1]);
-							
-							printf( "%s\n",root->name);  //this right here will be used to debug everything 	
-							printf( "%s\n",root0->name);  //this right here will be used to debug everything 	
-							
-							free(root); //free the variable	
-							free(root0); //free the variable
-						
-							//end everything here
-						
-				
+					
 						}
 	
 	
