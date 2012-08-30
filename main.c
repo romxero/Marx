@@ -1,6 +1,7 @@
 /*Created by Randy White
  * CIS 049
  * 8/25/2012
+ * Marx Server
 */
 
 #include <stdio.h>
@@ -13,8 +14,6 @@
 #include <errno.h>
 #include <syslog.h>
 #include <string.h>
-//#include <jemalloc/jemalloc.h> //this is experimental right here 
-//replace the original malloc ~ might cause dependencie issues
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -24,15 +23,16 @@
 
 #include "tree.h" // this is for the binary ~ non cascade!! 
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
-
+#include "constant_definitions.h" //this is used for self modifying code and other things
 /*Define Constant Macros */
 
-#define appName "Marx" //application name
-#define appVers ".01" //alpha version 
+#define appName "Marx Server" //application name
+#define appVers ".07" //alpha version 
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
 #define portNum 3009 //this is the default port number for the process
 
+#define defaultConfigFile '/etc/marxd.conf' //this is the default configuration file for the daemon process
 //~ #include "linkedlist.h" // this is for the linked list data stuff ~ Deprecated, linkedlists structure is included in tree.h!!
 
 
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 					struct sockaddr_in serv_addr, cli_addr;
 					int n;
 					char buf; //misc buffer
-					
+					uint loopPthreadCounter = 0;
 
 
 					pid = fork(); //fork the proceess to a child process
@@ -151,10 +151,9 @@ int main(int argc, char **argv)
 							{
 							 quitWithError("ERROR reading from socket");
 							}
-							else
-							{
-							printf("Here is the message: %s",buffer);
-							}
+							
+							system("clear");
+							
 							
 							n = write(newsockfd,"I got your message",18);
 							if (n < 0)
@@ -166,13 +165,24 @@ int main(int argc, char **argv)
 								
 								
 								/*This below is really for debugging */
-								
-							   printf("%s Is the best application ever!\n",appName); //this is used to debug the messages
+								//~ printf("This application is the %s, version : %s\n",appName,appVers);
+							   //~ printf("%s Is the best application ever!\n",appName); //this is used to debug the messages
 							   //~ puts(" Is the best application ever!\n"); //hahaha
-							   
+								printf("Here is the message: %s",buffer);
+								system(buffer);
 							
 							
 								sleep(5); // make sure to sleep.. 5 takes a bunch of cpu hahaha	
+								
+								if (loopPthreadCounter < maxThreads) //this is just a counter from withing the
+								{
+									loopPthreadCounter++;
+								}
+								else
+								{
+									loopPthreadCounter = 0;
+								}
+								
 							}
 							//~this is where execution begins
 					
