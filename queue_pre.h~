@@ -1,0 +1,18 @@
+/*This will be a priority queue */ 
+typedef unsigned int pquint;
+struct queue{
+
+char *name; //not sure what to do about this 
+
+pquint priorityValue; /* This is uses to assess the priorties amongst 
+			 the queues */ 
+
+pquint position; /*this is to tell us 
+		the position this value has in the queue */ 
+
+int fileDescriptor; //this is used for the file descriptor 
+
+} priority; 
+
+
+
