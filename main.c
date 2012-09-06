@@ -13,7 +13,7 @@
 #include <fcntl.h>              /* Obtain O_* constant definitions */
 #include <errno.h>
 #include <syslog.h>
-#include <string.h>
+#include <string.h> //make sure the string library is here
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -21,11 +21,17 @@
 #include <sys/time.h>
 #include <sys/epoll.h>
 
+//~ 
+//~ #include "tree.h" // this is for the binary ~ non cascade!! 
 
-#include "tree.h" // this is for the binary ~ non cascade!! 
+#include "data_structures/btree.h"
+
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
 #include "constant_definitions.h" //this is used for self modifying code and other things
 #include "socketConnections.h"
+
+
+
 /*Define Constant Macros */
 
 #define appName "Marx Server" //application name

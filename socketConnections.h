@@ -31,7 +31,7 @@ static int createAndBindSocket(int const port)
 	return socketDescriptor; // if all else fails
 }
 
-
+//this right here might redundant if I dont set no blocking in the creation and binding function
 static int
 make_socket_non_blocking (int sfd)
 {

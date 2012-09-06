@@ -13,7 +13,7 @@
 #include <fcntl.h>              /* Obtain O_* constant definitions */
 #include <errno.h>
 #include <syslog.h>
-#include <string.h>
+#include <string.h> //make sure the string library is here
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -22,7 +22,8 @@
 #include <netdb.h> //this has some structures to pass a host to this to the client program.
 #include <sys/epoll.h>
 
-#include "queue.h" //will only be using the queue library
+//~ #include "queue.h" //will only be using the queue library
+#include "data_structures/queue.h"
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
 #include "constant_definitions.h" //this is used for self modifying code and other things
 #include "socketConnections.h"
