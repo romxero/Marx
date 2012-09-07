@@ -14,13 +14,18 @@
 #include <errno.h>
 #include <syslog.h>
 #include <string.h> //make sure the string library is here
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <signal.h>
+
 #include <linux/futex.h>
 #include <sys/time.h>
 #include <sys/epoll.h>
 
+
+#include <sys/types.h> 
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 //~ 
 //~ #include "tree.h" // this is for the binary ~ non cascade!! 
 
@@ -35,17 +40,23 @@
 /*Define Constant Macros */
 
 #define appName "Marx Server" //application name
-#define appVers ".10" //alpha version 
+#define appVers ".12" //alpha version 
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
-#define portNum 3009 //this is the default port number for the process
-
+#define portNum "3009" //this is the default port number for the process
+#define VARIANCE 500 //this is used for the variaince within searchin of the binary tree
 #define defaultConfigFile '/etc/marxd.conf' //this is the default configuration file for the daemon process
-//~ #include "linkedlist.h" // this is for the linked list data stuff ~ Deprecated, linkedlists structure is included in tree.h!!
 
 
 
-//~ char* const directive = 'HELLO';	
+
+void cleanUp()
+{
+	puts("Goodbye!, Process has been killed");
+	
+}
+
+
 
 
 
@@ -65,12 +76,23 @@ int main(int argc, char **argv)
 					socklen_t clilen; //socket structures
 					char buffer[256]; //character buffer for sockets
 					struct sockaddr_in serv_addr, cli_addr;
+					
+					/* signal stuff */
+					struct sigaction saTerm;
+					memset(&saTerm, 0, sizeof(saTerm));
+					saTerm.sa_handler = &cleanUp;
+					sigaction(SIGTERM, &saTerm, NULL);
+					
+					//~ struct socklen_t client_size;
 					int n;
 					char buf; //misc buffer
 					uint loopPthreadCounter = 0;
 					int errorTrap; 
-				
-				
+					int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff
+					
+					BTREE rootNode = newNode();
+					rootNode = NULL; //do this to initialize
+					
 					pid = fork(); //fork the proceess to a child process
 					
 					if(pid < 0)
@@ -110,7 +132,7 @@ int main(int argc, char **argv)
 					//close(STDOUT_FILENO); //standard output
 					close(STDERR_FILENO);
 					
-					
+					//~ 
 					
 								/* Main loop begins below */ 
 								sockfd = createAndBindSocket(portNum);
@@ -129,64 +151,94 @@ int main(int argc, char **argv)
 									}
 								
 							newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-							bzero(buffer,256);
+							
+								//~ bzero(buffer,256);
 								
-							//~ recv(newsockfd,buffer,256,0);
-							
-							 n = recv(newsockfd,buffer,255,0);
-							 if (n < 0) error("ERROR reading from socket");
+								//~ char* text = (char *) malloc(256 * sizeof(char));
+								//~ text = recieveMessage(newsockfd);
+								//~ strcpy(text,buffer);
+								//~ bzero(text,1024);
+								
+								char *hostName;
+								int sendVar = 0x0000;
+								int *sendVarPtr = &sendVar;
+								
+								int recieveVar = 0x0000;
+								int *recieveVarPtr = &recieveVar;
+								
+								recv(newsockfd,recieveVarPtr,sizeof(int),0);
+								
+								if (recieveVar == 0xFFFF)
+								{
+									sendVar = 0xABCD;
+									send(newsockfd,sendVarPtr,sizeof(int),0);
+									hostName = recieveMessage(newsockfd);
+								}
+								
+								//~ sendMessage(newsockfd,"HOSTNAME\0");
+								//~ send(newsockfd,sendVarPtr,sizeof(int),0);
+								
+								
+								
+								
+								
+								char ip[256]; //this is used for the hostname
+								char service[20];
+								
+								socklen_t peerNameLength;
+								struct sockaddr_storage peerName;
+								
+								peerNameLength = sizeof peerName;
+								n = getpeername(newsockfd, (struct sockaddr *) &peerName, &peerNameLength);
+								struct sockaddr_in *peerFinal = (struct sockaddr_in *) &peerName;
+								inet_ntop(AF_INET, &peerFinal->sin_addr,ip,sizeof(ip));
+								
+								if (n < 0) puts("Couldnt extract hostname");
+								close(newsockfd);
 							 
-							 n = send(newsockfd,"I got your message",18,0);
-							 if (n < 0) error("ERROR writing to socket");
-							 close(newsockfd);
-							 close(sockfd);
-							
+							 
+							 
+							 
+							//~ int t = 0;
 							while(1)
 							{
 								
 								
+					
 								
-								//~ printf("Here is the message: %s\n",buffer);
-								//~ printf("%s\n",buffer);
-								//~ 
-								
-								
-								system(buffer); // this is so dangerous right here be very careful/// 
-								sleep(5); //dont waste the cpu with this loop/./ yeah
+								printf("%s\n",ip); //debug right here
+								puts(hostName);
+								//~ printf("%s\n",text); //debug right here
+								//~ system(buffer); // this is so dangerous right here be very careful/// 
+								sleep(2); //dont waste the cpu with this loop/./ yeah
 										
-										
-								if (loopPthreadCounter < maxThreads) //this is just a counter from withing the
-								{
-									loopPthreadCounter++;
-								}
-								else
-								{
-									loopPthreadCounter = 0;
-								}
+								break; //just adding this here for debugging purposes
+								
+						
 							
 							}
 										
 										
-										
-								/*This below is really for debugging */
-								//~ printf("This application is the %s, version : %s\n",appName,appVers);
-							   //~ printf("%s Is the best application ever!\n",appName); //this is used to debug the messages
-							   //~ puts(" Is the best application ever!\n"); //hahaha
-								
-								
-							
-								
-							
+						
 							//~this is where execution begins
+					close(sockfd);
+					shutdown(sockfd,SHUT_WR);
 					
 					
 						return 0;
-
+						
+						
 						}
 	
 	
 
-	
+	/*
+	 * 
+	 * Change the linked list to accomodate socket descriptors within this application
+	 * 
+	 * 
+	 * 
+	 * */
 	
 	
  

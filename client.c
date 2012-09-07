@@ -35,7 +35,7 @@
 #define maxThreads 64 //might increase depending on the processor
 #define portNum 3009 //this is the default port number for the process
 #define defaultConfigFile '/etc/marx.conf' //this is the default file for the client process
-
+char const *portNumChar = "3009";
 
 
 
@@ -74,35 +74,75 @@ int main(int argc, char **argv)
 					quitWithError("ERROR connecting");
 				}
 				
-				printf("Please enter the message: ");
-				  bzero(buffer,256);
-				  fgets(buffer,255,stdin);
-				  n = write(sockfd,buffer,strlen(buffer));
-				  if (n < 0)
-				  {
-					quitWithError("ERROR writing to socket");
-					}
-				  bzero(buffer,256);
-				  n = read(sockfd,buffer,255);
-				  if (n < 0)
-				  {
-					quitWithError("ERROR reading from socket");
-					}
-				  printf("%s",buffer);
+					//~ printf("Please enter the message: ");
+				  int sendVar = 0x0000;
+				  int *sendVarPtr = &sendVar;
 				  
+				  int recieveVar = 0x0000;
+				  int *recieveVarPtr = &recieveVar;
+				  //~ printf("%d\n",sendVar);
+				  //~ char *text = "new";
+				  sendVar = 0xFFFF;
+				  send(sockfd,sendVarPtr,sizeof(int),0);
+				  
+				  recv(sockfd,recieveVarPtr,sizeof(int),0);
+				  if (recieveVar == 0xABCD)
+				  {
+					  sendMessage(sockfd,getenv("HOSTNAME"));
+				  }
+				  //~ printf("%d\n",sendVar);
+				  //~ sendMessage(sockfd,"NEW\0");
+				 //~ char *text = recieveMessage(sockfd);
+				  //~ puts(text);
+				  //~ if (text == "HOSTNAME")
+				  //~ {
+		
+					  //~ 
+				  //~ }
+				  //~ n = send(sockfd,text,sizeof(text),0);
+				  
+				  //~ if (n < 0) error("ERROR reading from socket");
+				  
+				  //~ n = recv(sockfd,text,sizeof(text),0);
+				  //~ if (buffer == "hostname")
+				  //~ {
+								  //~ bzero(buffer,256);
+				  //~ gethostname(buffer, sizeof(buffer));
+				  //~ n = send(sockfd,buffer,sizeof(buffer),0);
+				  //~ if (n < 0) error("ERROR reading from socket");
+				  //~ 
+					//~ }
+		
+				  //~ gethostname(buffer, sizeof(buffer));
+				  //~ fgets(buffer,255,stdin);
+				  
+				  
+				  //~ n = write(sockfd,buffer,strlen(buffer));
+				  //~ if (n < 0)
+				  //~ {
+					//~ quitWithError("ERROR writing to socket");
+					//~ }
+				  //~ bzero(buffer,256);
+				  //~ n = read(sockfd,buffer,255);
+				  //~ if (n < 0)
+				  //~ {
+					//~ quitWithError("ERROR reading from socket");
+					//~ }
+				  //~ printf("%s",buffer);
+				  //~ 
+				close(sockfd);
 				
 				
-				
-				if (loopPthreadCounter < maxThreads) //this is just a counter from withing the
-								{
-									loopPthreadCounter++;
-								}
-								else
-								{
-									loopPthreadCounter = 0;
-								}
-								
-								return 0;
+				//~ if (loopPthreadCounter < maxThreads) //this is just a counter from withing the
+								//~ {
+									//~ loopPthreadCounter++;
+								//~ }
+								//~ else
+								//~ {
+									//~ loopPthreadCounter = 0;
+								//~ }
+								//~ 
+								//~ return 0;
 	//~ printf("This application is the %s, version : %s\n",appName,appVers);
  
 }

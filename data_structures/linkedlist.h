@@ -5,6 +5,7 @@ typedef unsigned char* HOSTNAME;
 struct linkedList
 {
 	HOSTNAME hostname;
+	int peerSocket;
 	struct linkedList *next;
 	struct linkedList *front;
 	
