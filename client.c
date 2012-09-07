@@ -30,7 +30,7 @@
 /*Define Constant Macros */
 
 #define appName "Marx Client" //application name
-#define appVers ".02" //alpha version 
+#define appVers ".05" //alpha version 
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
 #define portNum 3009 //this is the default port number for the process
