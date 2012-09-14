@@ -14,10 +14,11 @@ struct linkedList
 typedef struct linkedList ELEMENT;
 typedef ELEMENT *LINK;
 
-void initLinkedList(LINK root, HOSTNAME var)
+void initLinkedList(LINK root, HOSTNAME var, int socket)
 {
 	root->next = NULL;
 	root->hostname = var;
+	root->peerSocket = socket;
 	root->front = NULL;
 }
 
@@ -26,10 +27,11 @@ LINK returnListElement()
 	return calloc(1,sizeof(ELEMENT));
 }
 
-void addElementToList(LINK root, HOSTNAME var)
+void addElementToList(LINK root, HOSTNAME var, int socket)
 {
 	LINK tempNode = returnListElement();
 	tempNode->hostname = var;
+	tempNode->peerSocket = socket;
 	tempNode->next = NULL;
 	tempNode->front = root;
 	
@@ -50,19 +52,6 @@ void addElementToList(LINK root, HOSTNAME var)
 	
 }
 
-int nextNode(LINK root)
-{
-	
-	if (root->next == NULL)
-	{
-		return -1;
-	}
-	else
-	{
-		root = root->next;
-	}
-	
-}
 
 int removeAllNodes(LINK root)
 {

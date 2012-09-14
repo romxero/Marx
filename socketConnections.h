@@ -129,3 +129,193 @@ char* recieveMessage(int sockfd)
 	//~ strcpy(message,buffer);
 	return message;
 }
+
+
+int serverFunction(int socket, BTREE *root, QUEUE *jobQueue, char *loopVar)
+{
+	
+								//these are where the server functions are
+								int errorTrap = 1;
+								
+								int sendVar = ZERO_OUT_VALUE;
+								int *sendVarPtr = &sendVar;
+								
+								int recieveVar = ZERO_OUT_VALUE;
+								int *recieveVarPtr = &recieveVar;
+								int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff
+								errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+								switch(recieveVar)
+								{
+									case NEW_PEER:
+									{
+									sendVar = SEND_HOSTNAME;
+									errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+									char *hostName;
+									int returnedBenchScore = 1000;
+									hostName = recieveMessage(socket);
+									
+									//send for the benchscore
+									
+									sendVar = SEND_BENCHSCORE;
+									errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+									
+									recieveVar = ZERO_OUT_VALUE;
+									
+									errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+									returnedBenchScore = recieveVar; //this is used for benchscore
+									
+									recieveVar = ZERO_OUT_VALUE;
+										if (*root == NULL)
+										{
+											*root = newNode();
+											bTreeInit(*root,returnedBenchScore,hostName,socket);
+										}
+										else
+										{
+											
+											int (*functionPointer)();
+											functionPointer = &addHostnameToBTree;
+											errorTrap  = searchBtree(*root,returnedBenchScore,hostName,500,socket,functionPointer);
+											if (errorTrap < 0)
+											{
+												
+												//add a new node
+												addToTree(*root,returnedBenchScore,hostName,socket);
+											}
+											
+											
+											
+										}
+									break;
+									}
+									case QUEUE_JOBS:
+									{
+										
+										//queue jobs right here
+										char *jobs;
+										sendVar = READY_FOR_JOBS;
+										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+										
+										//~ while(recieveVar != QUEUE_JOBS_END)
+										//~ {
+												//~ recieveVar = ZERO_OUT_VALUE;
+												jobs = recieveMessage(socket);
+												if (*root != NULL)
+												{
+												
+												functionPointer = &launchJobs; //remove all elements
+												traverseBTree(*root,POST_ORDER, jobs, functionPointer);
+												}
+												//~ enqueue(jobQueue,recieveMessage(socket));
+												
+												//~ errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+												//~ if (recieveVar == CONTINUE_ADDING_TO_QUEUE)
+												//~ {
+													//~ continue;
+												//~ }
+											
+										//~ }
+										
+										//~ recieveVar = ZERO_OUT_VALUE;
+										//~ errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+										//~ 
+										//~ if (recieveVar == DISTRIBUTE_SPECIFIER)
+										//~ {
+											//~ //more to do here
+											//~ 
+										//~ }
+										//~ else if (recieveVar == DISTRIBUTE_ROUND_ROBIN)
+										//~ {
+											//~ while (!(peek(jobQueue) == "null"))
+											//~ {
+													//~ 
+													//~ functionPointer = &launchJobs; //remove all elements
+			//~ 
+													//~ traverseBTree(*root,POST_ORDER, peek(jobQueue), functionPointer);
+													//~ dequeue(jobQueue);
+												//~ 
+												//~ 
+											//~ }
+											//~ 
+										//~ }
+										
+										close(socket); //make sure you close the socket because this is just initiating a job
+										
+										break;
+									}
+									case KILL_SERVER:
+									{
+										*loopVar = 1;
+										break;
+									}
+									
+									
+								}
+								
+								sendVar = ZERO_OUT_VALUE;
+								recieveVar = ZERO_OUT_VALUE;
+	
+	
+}
+
+int peerFunction(int socket, char *loopVar)
+{
+							
+								//this function is for peers
+								int errorTrap = 1;
+								
+								int sendVar = ZERO_OUT_VALUE;
+								int *sendVarPtr = &sendVar;
+								
+								int recieveVar = ZERO_OUT_VALUE;
+								int *recieveVarPtr = &recieveVar;
+								
+								errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+								 switch(recieveVar)
+								{
+									case SEND_HOSTNAME:
+									{
+									errorTrap = sendMessage(socket,getenv("HOSTNAME"));
+									break;
+									}
+									case SEND_BENCHSCORE:
+									{
+										sendVar = benchMark();
+										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+										break; 
+									}
+									case SEND_JOB:
+									{
+									char *job = recieveMessage(socket);
+									 
+									int errorTrap = system(job);
+									if (errorTrap < 0)
+									{
+										//an error has been sent
+											sendVar = JOB_RECIEVED_ERROR;
+											errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+									}
+									else
+									{
+											sendVar = JOB_RECIEVED_OK;
+											errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+										
+									}
+										free(job);
+									break;
+									
+									}
+									case KILL_PEER:
+									{
+										*loopVar = 1;	
+										break;
+										
+									}
+								}
+								
+								
+								sendVar = ZERO_OUT_VALUE;
+								recieveVar = ZERO_OUT_VALUE;
+	
+	
+}

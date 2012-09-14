@@ -28,13 +28,14 @@
 #include <netdb.h>
 //~ 
 //~ #include "tree.h" // this is for the binary ~ non cascade!! 
-
+#include "constant_definitions.h" //this is used for self modifying code and other things
+#include "data_structures/queue.h" //will only be using the queue library
 #include "data_structures/btree.h"
 
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
-#include "constant_definitions.h" //this is used for self modifying code and other things
-#include "socketConnections.h"
 
+#include "socketConnections.h"
+#include "benchmark.h"
 
 
 /*Define Constant Macros */
@@ -43,7 +44,7 @@
 #define appVers ".20" //alpha version 
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
-#define portNum "3009" //this is the default port number for the process
+#define portNum "65000" //this is the default port number for the process
 #define VARIANCE 500 //this is used for the variaince within searchin of the binary tree
 #define defaultConfigFile '/etc/marxd.conf' //this is the default configuration file for the daemon process
 
@@ -53,6 +54,12 @@
 void cleanUp()
 {
 	puts("Goodbye!, Process has been killed");
+	
+	//put stuff in here so that we can deallocate the memory inside of this application
+	
+	//~ functionPointer = &freeMemInBTree; //remove all elements
+			//~ 
+	//~ traverseBTree(rootNode,POST_ORDER,functionPointer);
 	
 }
 
@@ -90,49 +97,13 @@ int main(int argc, char **argv)
 					int errorTrap; 
 					int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff
 					
-					BTREE rootNode = newNode();
-					rootNode = NULL; //do this to initialize
+					static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
+					QUEUE jobQueue;
+					initQueue(&jobQueue);
 					
-					pid = fork(); //fork the proceess to a child process
+					char boolBreakLoop = -1;
+					char *boolBreakLoopPtr = &boolBreakLoop;
 					
-					if(pid < 0)
-					{
-						printf("ERROR!\n");
-						quitWithError("Could not get a PID for child process"); //new way to handle errors
-
-						exit(EXIT_FAILURE); // exit, things have failed
-					}
-					
-					if(pid > 0)
-					{
-						//Things have succeeded
-						exit(EXIT_SUCCESS); // exit, things have failed
-					}
-					
-					umask(0); //change the file mask
-					
-					sid = setsid(); //get a set id for child process
-						
-						
-					if(sid < 0)
-					{
-						printf("ERROR!\n");
-						quitWithError("Could not get a SID for child process"); //new way to handle errors
-						exit(EXIT_FAILURE); // exit, things have failed
-					}
-					
-					/* Change the current working directory */
-					if ((chdir("/")) < 0) {
-					/* Log any failure here */
-					exit(EXIT_FAILURE);
-					}
-					//closes the standard display stuff
-					/* Close out the standard file descriptors */
-					close(STDIN_FILENO);
-					//close(STDOUT_FILENO); //standard output
-					close(STDERR_FILENO);
-					
-					//~ 
 					
 								/* Main loop begins below */ 
 								sockfd = createAndBindSocket(portNum);
@@ -142,7 +113,7 @@ int main(int argc, char **argv)
 								}
 								
 								
-								errorTrap = listen(sockfd,5); //allows this process to listen on this socket
+								errorTrap = listen(sockfd,100); //allows this process to listen on this socket ... 100 connections will wait in a queue
 								
 								  if (errorTrap < 0)
 									{
@@ -150,70 +121,24 @@ int main(int argc, char **argv)
 									  
 									}
 								
-							newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-							
-								//~ bzero(buffer,256);
-								
-								//~ char* text = (char *) malloc(256 * sizeof(char));
-								//~ text = recieveMessage(newsockfd);
-								//~ strcpy(text,buffer);
-								//~ bzero(text,1024);
-								
-								char *hostName;
-								int sendVar = 0x0000;
-								int *sendVarPtr = &sendVar;
-								
-								int recieveVar = 0x0000;
-								int *recieveVarPtr = &recieveVar;
-								
-								recv(newsockfd,recieveVarPtr,sizeof(int),0);
-								
-								if (recieveVar == 0xFFFF)
-								{
-									sendVar = 0xABCD;
-									send(newsockfd,sendVarPtr,sizeof(int),0);
-									hostName = recieveMessage(newsockfd);
-								}
-								
-								//~ sendMessage(newsockfd,"HOSTNAME\0");
-								//~ send(newsockfd,sendVarPtr,sizeof(int),0);
-								
-								
-								
-								
-								
-								char ip[256]; //this is used for the hostname
-								char service[20];
-								
-								socklen_t peerNameLength;
-								struct sockaddr_storage peerName;
-								
-								peerNameLength = sizeof peerName;
-								n = getpeername(newsockfd, (struct sockaddr *) &peerName, &peerNameLength);
-								struct sockaddr_in *peerFinal = (struct sockaddr_in *) &peerName;
-								inet_ntop(AF_INET, &peerFinal->sin_addr,ip,sizeof(ip));
-								
-								if (n < 0) puts("Couldnt extract hostname");
-								close(newsockfd);
-							 
-							 
-							 
-							 
-							//~ int t = 0;
-							while(1)
+
+							while(boolBreakLoop < 0)
 							{
 								
-								
-					
-								
-								printf("%s\n",ip); //debug right here
-								puts(hostName);
-								//~ printf("%s\n",text); //debug right here
-								//~ system(buffer); // this is so dangerous right here be very careful/// 
-								sleep(2); //dont waste the cpu with this loop/./ yeah
+									newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+									
+									if (newsockfd != -1)
+									{
 										
-								break; //just adding this here for debugging purposes
+										
+										serverFunction(newsockfd,&rootNode,&jobQueue,boolBreakLoopPtr); //main server function
+									
+										continue;
+										
+									}
 								
+								
+									sleep(5);
 						
 							
 							}
@@ -223,7 +148,10 @@ int main(int argc, char **argv)
 							//~this is where execution begins
 					close(sockfd);
 					shutdown(sockfd,SHUT_WR);
-					
+					//~ free(hostName);
+					functionPointer = &freeMemInBTree; //remove all elements
+			
+					traverseBTree(rootNode,POST_ORDER, NULL, functionPointer);
 					
 						return 0;
 						

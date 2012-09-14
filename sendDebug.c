@@ -22,13 +22,13 @@
 #include <netdb.h> //this has some structures to pass a host to this to the client program.
 #include <sys/epoll.h>
 
-#include "constant_definitions.h" //this is used for self modifying code and other things
+
 #include "benchmark.h"
 #include "data_structures/btree.h"
 #include "data_structures/queue.h" //will only be using the queue library
 
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
-
+#include "constant_definitions.h" //this is used for self modifying code and other things
 #include "socketConnections.h"
 
 /*Define Constant Macros */
@@ -86,18 +86,31 @@ int main(int argc, char **argv)
 				  
 				  int recieveVar = ZERO_OUT_VALUE;
 				  int *recieveVarPtr = &recieveVar;
-				  printf("%d\n",sendVar);
-				  char *text = "new";
-				  sendVar = NEW_PEER;
+		
+				  sendVar = QUEUE_JOBS;
+				  
 				  send(sockfd,sendVarPtr,sizeof(int),0);
 				  
+				  recv(sockfd,recieveVarPtr,sizeof(int),0);
+				  if (recieveVar == READY_FOR_JOBS)
+				  {
+					  sendMessage(sockfd,"procinfo");
+					  //~ sendMessage(sockfd,"uname -a");
+					  //~ sendMessage(sockfd,"set");
+					  
+					  //~ sendVar = QUEUE_JOBS_END;
+					  //~ sendVar = QUEUE_JOBS_END;
+					  //~ sendVar = QUEUE_JOBS_END;
+					  //~ sendVar = QUEUE_JOBS_END;
+				  //~ 
+						//~ send(sockfd,sendVarPtr,sizeof(int),0);
+				  //~ 
+					  //~ sendVar = DISTRIBUTE_ROUND_ROBIN;
+				  //~ 
+				  //~ send(sockfd,sendVarPtr,sizeof(int),0);
+				  }
 				  
-				while(boolBreakLoop < 0)
-				{  
-					
-					
-						peerFunction(sockfd,boolBreakLoopPtr);
-				}
+				
 				 
 				close(sockfd);
 				

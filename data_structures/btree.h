@@ -29,7 +29,7 @@ BTREE newNode()
 	return calloc(1, sizeof(NODE));
 }
 
-void bTreeInit(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList)
+void bTreeInit(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList, int socket)
 {
 			//~ root = newNode();
 			root->benchscore = passedValue;
@@ -37,7 +37,7 @@ void bTreeInit(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList)
 			root->right = NULL;
 			root->serverList = returnListElement();
 			
-			initLinkedList(root->serverList, hostnameForServerList);
+			initLinkedList(root->serverList, hostnameForServerList, socket);
 	
 }
 
@@ -56,41 +56,41 @@ int freeMemInBTree(BTREE root)
 }
 
 
-void traverseBTree(BTREE root, const char DIRECTIVE, int (*functionPointer)(BTREE root))
+void traverseBTree(BTREE root, const char DIRECTIVE, char *jobs, int (*functionPointer)(BTREE root, char *jobs))
 {
 		
 		if (root != NULL)
 		{
 			if (DIRECTIVE == INORDER)
 			{
-				traverseBTree(root->left,DIRECTIVE,functionPointer);
+				traverseBTree(root->left,DIRECTIVE, jobs, functionPointer);
 				//Functionality here
-				(*functionPointer)(root);
-				traverseBTree(root->right,DIRECTIVE,functionPointer);
+				(*functionPointer)(root,jobs);
+				traverseBTree(root->right,DIRECTIVE, jobs, functionPointer);
 			}
 			else if (DIRECTIVE == POST_ORDER)
 			{
-				traverseBTree(root->left,DIRECTIVE,functionPointer);
-				traverseBTree(root->right,DIRECTIVE,functionPointer);
+				traverseBTree(root->left,DIRECTIVE, jobs, functionPointer);
+				traverseBTree(root->right,DIRECTIVE, jobs, functionPointer);
 				//Functionality here
-				(*functionPointer)(root);
+				(*functionPointer)(root,jobs);
 				
 			}
 			else if (DIRECTIVE == PRE_ORDER)
 			{
-				(*functionPointer)(root);
+				(*functionPointer)(root,jobs);
 				//Functionality here
-				traverseBTree(root->left,DIRECTIVE,functionPointer);
-				traverseBTree(root->right,DIRECTIVE,functionPointer);
+				traverseBTree(root->left,DIRECTIVE, jobs, functionPointer);
+				traverseBTree(root->right,DIRECTIVE, jobs, functionPointer);
 				
 			}
 			else
 			{
 				/* Else just do inorder */ 
-				traverseBTree(root->left,DIRECTIVE,functionPointer);
+				traverseBTree(root->left,DIRECTIVE, jobs, functionPointer);
 				//Functionality here
-				(*functionPointer)(root);
-				traverseBTree(root->right,DIRECTIVE,functionPointer);
+				(*functionPointer)(root,jobs);
+				traverseBTree(root->right,DIRECTIVE, jobs, functionPointer);
 				
 			}
 		
@@ -102,11 +102,11 @@ void traverseBTree(BTREE root, const char DIRECTIVE, int (*functionPointer)(BTRE
 }
 
 
-void addToTree(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList)
+void addToTree(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList, int socket)
 {
 	
 	BTREE tempNode = newNode();
-	bTreeInit(tempNode,passedValue,hostnameForServerList);
+	bTreeInit(tempNode,passedValue,hostnameForServerList, socket);
 	
 	//Might need to add some functions for adding things to list
 	
@@ -134,7 +134,7 @@ void addToTree(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList)
 					}
 					
 				if (passedValue <= root->benchscore)
-					{	//Right
+					{	//Left
 						
 						
 							if (root->left == NULL)
@@ -158,7 +158,7 @@ void addToTree(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList)
 
 
 
-int searchBtree(BTREE root, int benchData, HOSTNAME hostname, int variance, int (*functionPointer)(BTREE root, HOSTNAME hostname))
+int searchBtree(BTREE root, int benchData, HOSTNAME hostname, int variance, int socket, int (*functionPointer)(BTREE root, HOSTNAME hostname, int socket))
 {
 	int minBench = (benchData - variance);
 	
@@ -170,19 +170,19 @@ int searchBtree(BTREE root, int benchData, HOSTNAME hostname, int variance, int 
 			{	
 					if (root->benchscore == benchData)
 					{
-						(*functionPointer)(root,hostname);
+						(*functionPointer)(root,hostname,socket);
 						return 1;
 						
 					}
 					else if (root->benchscore >= minBench & root->benchscore <= benchData)
 					{
-						(*functionPointer)(root,hostname);
+						(*functionPointer)(root,hostname,socket);
 						return 1;
 						
 					}
 					else if (root->benchscore <= maxBench & root->benchscore >= benchData)
 					{
-						(*functionPointer)(root,hostname);
+						(*functionPointer)(root,hostname,socket);
 						return 1;
 						
 					}
@@ -205,7 +205,7 @@ int searchBtree(BTREE root, int benchData, HOSTNAME hostname, int variance, int 
 }
 
 
-int displayHostnames(BTREE root)
+int displayHostnames(BTREE root, char *jobs)
 {
 	LINK tempList = root->serverList;
 	
@@ -226,7 +226,32 @@ int displayHostnames(BTREE root)
 	
 }
 
-int addHostnameToBTree(BTREE root, HOSTNAME hostName)
+int launchJobs(BTREE root, char *jobs)
+{
+	LINK tempList = root->serverList;
+	
+	if (tempList == NULL)
+	{
+		return -1;
+	}
+	else
+	{
+			while(!(tempList == NULL))
+			{
+				//~ SEND_JOB
+				int sendVar = SEND_JOB;
+				int *sendVarPtr = &sendVar;
+				send(tempList->peerSocket,sendVarPtr,sizeof(int),0);
+				sendMessage(tempList->peerSocket,jobs);
+				
+				tempList = tempList->next;
+				
+			}
+	}
+	
+}
+
+int addHostnameToBTree(BTREE root, HOSTNAME hostName, int socket)
 {
 	if (root == NULL)
 	{
@@ -234,7 +259,7 @@ int addHostnameToBTree(BTREE root, HOSTNAME hostName)
 	}
 	else
 	{
-		addElementToList(root->serverList,hostName);
+		addElementToList(root->serverList,hostName,socket);
 	}
 }
 
@@ -244,7 +269,7 @@ int doNothing(BTREE root)
 	sleep(1);
 }
 
-int doNothingSearch(BTREE root, HOSTNAME hostName)
+int doNothingSearch(BTREE root, HOSTNAME hostName, int socket)
 {
 	sleep(1);
 }

@@ -18,13 +18,13 @@ void main()
 			searchBtree(rootNode,500,"Calvin",VARIANCE,fp);
 			
 			
-			errorTrap = searchBtree(rootNode,5,"Whoops",VARIANCE,fp);
+			errorTrap = searchBtree(rootNode,5,"Darla",VARIANCE,fp);
 			
 			if(errorTrap < 0)
 			{
-				addToTree(rootNode,5,"Whoops");
+				addToTree(rootNode,5,"Kevin");
 			}
-			searchBtree(rootNode,5,"TEEHEE",VARIANCE,fp);
+			searchBtree(rootNode,5,"Steve",VARIANCE,fp);
 			
 			//~ printf("%d\n",rootNode->benchscore);
 			//~ puts(rootNode->serverList->hostname);

@@ -1,18 +1,18 @@
-typedef unsigned int DATA;
+typedef unsigned char *QDATA;
 
-struct linkedList
+struct qLinkedList
 {
-	DATA value;
-	struct linkedList *next;
+	QDATA value;
+	struct qLinkedList *next;
 };
 
 
-typedef struct linkedList ELEMENT;
-typedef ELEMENT *LINK;
+typedef struct qLinkedList QELEMENT;
+typedef QELEMENT *QLINK;
 
 struct queue
 {
-	LINK head, tail;
+	QLINK head, tail;
 	int numOfElements;
 	
 };
@@ -38,14 +38,14 @@ void initQueue(QUEUE *root)
 	root->numOfElements = 0;
 }
 
-LINK returnQueueElement()
+QLINK returnQueueElement()
 {
-	return malloc(sizeof(LINK) * 1);
+	return malloc(sizeof(QLINK) * 1);
 }
 
-void enqueue(QUEUE *root, DATA var)
+void enqueue(QUEUE *root, QDATA var)
 {
-	LINK temp = returnQueueElement();
+	QLINK temp = returnQueueElement();
 	temp->value = var; 
 	temp->next = NULL;
 	if (isQueueEmpty(root) > 0)
@@ -69,7 +69,7 @@ int dequeue(QUEUE *root)
 	}
 	else
 	{
-		LINK temp = root->head->next;
+		QLINK temp = root->head->next;
 		free(root->head);
 		root->head = temp;
 		root->numOfElements--;
@@ -79,7 +79,15 @@ int dequeue(QUEUE *root)
 }
 
 
-int peek(QUEUE *root)
+char* peek(QUEUE *root)
 {
+	if (root->head != NULL)
+	{
 	return root->head->value;
+	}
+	else
+	{
+		return NULL; 
+	}
+
 }

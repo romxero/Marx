@@ -1,29 +1,30 @@
 /*Experimenting with defining constansts to self modify functions.. they are in hex! */
 
-#define postOrder 0x01
-#define inOrder 0x02
-#define preOrder 0x03
+#define ZERO_OUT_VALUE 0x0000
+#define SEND_HOSTNAME 0x0001
+#define SEND_BENCHSCORE 0x0002
+#define SEND_QUEUE_NUM 0x0003
+#define RECIEVED_OK 0x0004 //this should be very important
+#define KILL_PEER 0x0005
 
-//~ #define postOrder 0x04
-//~ #define postOrder 0x05
-//~ #define postOrder 0x06
-//~ #define postOrder 0x07
-//~ #define postOrder 0x08
-//~ #define postOrder 0x09
-//~ #define postOrder 0x0A
-//~ #define postOrder 0x0B
-//~ #define postOrder 0x0C
-//~ #define postOrder 0x0D
-//~ #define postOrder 0x0E
-//~ #define postOrder 0x0F
-//~ #define postOrder 0x10
-//~ #define postOrder 0x11
-//~ #define postOrder 0x12
-//~ #define postOrder 0x13
-//~ #define postOrder 0x14
-//~ #define postOrder 0x15
-//~ #define postOrder 0x16
-//~ #define postOrder 0x17
-//~ #define postOrder 0x18
-//~ #define postOrder 0x19
-//~ #define postOrder 0x1A
+#define QUEUE_JOBS 0x0006
+#define DISTRIBUTE_SPECIFIER 0x0007
+#define DISTRIBUTE_ROUND_ROBIN 0x0008
+#define SPECIFIC_PEERS 0x0009
+#define MIN 0x000A
+#define MAX 0x000B
+#define QUEUE_JOBS_END 0x000C
+
+#define SEND_JOB 0x000D
+#define SEND_JOB_UNAME 0x000E
+#define JOB_RECIEVED_OK 0x000F
+
+#define JOB_RECIEVED_ERROR 0x0010
+#define KILL_SERVER 0x0011
+#define READY_FOR_JOBS 0x0012
+#define CONTINUE_ADDING_TO_QUEUE 0x0013
+
+#define NEW_PEER 0xFFFF
+
+
+//more work needs to be done here
