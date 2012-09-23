@@ -4,6 +4,7 @@
  * Marx Server
 */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,83 +27,108 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-//~ 
-//~ #include "tree.h" // this is for the binary ~ non cascade!! 
+
 #include "constant_definitions.h" //this is used for self modifying code and other things
 #include "data_structures/queue.h" //will only be using the queue library
-#include "data_structures/btree.h"
+#include "data_structures/btree.h" //binary tree stuff
+#include "data_structures/pqueue.h" //priority queue stufff
 
-#include "etc_functions.h" // this is for the binary ~ non cascade!! 
+#include "etc_functions.h" // misc functions
 
-#include "socketConnections.h"
+
 #include "benchmark.h"
 
+#include "socketConnections.h"
 
 /*Define Constant Macros */
 
 #define appName "Marx Server" //application name
-#define appVers ".20" //alpha version 
+#define appVers ".25" //alpha version 
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
 #define portNum "65000" //this is the default port number for the process
 #define VARIANCE 500 //this is used for the variaince within searchin of the binary tree
 #define defaultConfigFile '/etc/marxd.conf' //this is the default configuration file for the daemon process
 
-
+char terminateApp = -1; //this is used to terminate the application
+char *terminateAppPtr = &terminateApp; //this is a pointer used to terminate the application
 
 
 void cleanUp()
 {
 	puts("Goodbye!, Process has been killed");
-	
-	//put stuff in here so that we can deallocate the memory inside of this application
-	
-	//~ functionPointer = &freeMemInBTree; //remove all elements
-			//~ 
-	//~ traverseBTree(rootNode,POST_ORDER,functionPointer);
+	terminateApp = 1; //this is just used to break out of the main loop
 	
 }
 
+struct threadData
+{
+	int networkSocket;
+	BTREE *btreeNode;
+	QUEUE *mainQueue;
+	char *breakLoopPtr;
+	
+	
+};
 
 
-
-
+void *threadWrapper(void *threadParameters)
+{
+	struct threadData *DataForFunction;
+	DataForFunction = (struct threadData *) threadParameters;
+	
+	serverFunction(DataForFunction->networkSocket,DataForFunction->btreeNode,DataForFunction->mainQueue,DataForFunction->breakLoopPtr); //main server function
+	pthread_exit(NULL);
+	
+}
 
 typedef unsigned int uint; //use this for an unsigned interger
 
 //maybe I should take out the pointer of pointer parmeter in main function
+
 int main(int argc, char **argv)
 {
 
-		
-
+				/* Multi-threading stuff */
+				int numCPU = sysconf( _SC_NPROCESSORS_ONLN );  
+				if (numCPU < 0) {quitWithError("Couldn't get correct CPU count!!");}//this gets the number of cpus
 				
-					
+				pthread_t threads[numCPU]; //the number of unique threads to implement
+				pthread_mutex_t pqueueMutex, peerMutex, killMutex; //three mutexes for multithreading operarions
+				uint threadCounter = 0;
+				
+				struct threadData serverDataForPthreads[numCPU]; //this is used as a wrapper data structure for our message passing functino in a multithreading environment
+				
+				
+				
+				
+				
 					pid_t pid, sid, cpid; // this is the pid for our daemon process
+					
+					
+					/* Socket Stuff */ 
 					int sockfd, newsockfd, portno; //for socket return values
-					socklen_t clilen; //socket structures
-					char buffer[256]; //character buffer for sockets
 					struct sockaddr_in serv_addr, cli_addr;
+					socklen_t clilen; //socket structures
+					
+					
 					
 					/* signal stuff */
 					struct sigaction saTerm;
 					memset(&saTerm, 0, sizeof(saTerm));
 					saTerm.sa_handler = &cleanUp;
-					sigaction(SIGTERM, &saTerm, NULL);
+					sigaction(SIGTERM, &saTerm, NULL); //this is what happens when the application gets killed
 					
-					//~ struct socklen_t client_size;
-					int n;
-					char buf; //misc buffer
-					uint loopPthreadCounter = 0;
-					int errorTrap; 
-					int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff
 					
+					
+					
+					/* Main event loop stuff */
+					int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff	
 					static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
 					QUEUE jobQueue;
-					initQueue(&jobQueue);
-					
-					char boolBreakLoop = -1;
-					char *boolBreakLoopPtr = &boolBreakLoop;
+					QUEUE *priorityQueue = NULL; //this is the main priority queue 
+					initQueue(&jobQueue,1);
+					int errorTrap; //used to find errors in the code
 					
 					
 								/* Main loop begins below */ 
@@ -121,33 +147,46 @@ int main(int argc, char **argv)
 									  
 									}
 								
+								int i = 0;
+								
+								for (; i < numCPU; i++)
+								{
+									serverDataForPthreads[i].networkSocket = -1;
+									serverDataForPthreads[i].btreeNode = &rootNode;
+									serverDataForPthreads[i].mainQueue = &jobQueue;
+									serverDataForPthreads[i].breakLoopPtr = terminateAppPtr;
+									
+								}
 
-							while(boolBreakLoop < 0)
+							while(terminateApp < 0)
 							{
+								if (threadCounter > numCPU) {threadCounter = 0;} //make sure it goes back to zero
 								
 									newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 									
 									if (newsockfd != -1)
 									{
 										
+										serverDataForPthreads[threadCounter].networkSocket = newsockfd;
 										
-										serverFunction(newsockfd,&rootNode,&jobQueue,boolBreakLoopPtr); //main server function
-									
+										//~ serverFunction(newsockfd,&rootNode,&jobQueue,terminateAppPtr); //main server function
+										pthread_create (&threads[threadCounter], NULL, (void *) &threadWrapper, (void *) &serverDataForPthreads[threadCounter]);
+										threadCounter++; //increment the thread counter
 										continue;
 										
 									}
 								
 								
-									sleep(5);
+									sleep(5); //if the loop ever gets here, we will sleep for 5 seconds
 						
 							
 							}
 										
 										
 						
-							//~this is where execution begins
-					close(sockfd);
-					shutdown(sockfd,SHUT_WR);
+					/* This is the clean up section outside of the main loop */
+					close(sockfd); //close the socket
+					shutdown(sockfd,SHUT_WR); 
 					//~ free(hostName);
 					functionPointer = &freeMemInBTree; //remove all elements
 			
@@ -167,9 +206,7 @@ int main(int argc, char **argv)
 	 * 
 	 * 
 	 * */
-	
-	
- 
+
 	//this is the end of the line right here,,, make sure to return 0 if everything went right
 
 

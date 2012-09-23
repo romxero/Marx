@@ -40,7 +40,7 @@
 #define portNum 65000 //this is the default port number for the process
 #define defaultConfigFile '/etc/marx.conf' //this is the default file for the client process
 char const *portNumChar = "65000";
-
+char terminateApp = -1; // this is used to terminate the app
 
 
 

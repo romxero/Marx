@@ -14,6 +14,7 @@ struct queue
 {
 	QLINK head, tail;
 	int numOfElements;
+	char priority; //this is the actual priority of the queue
 	
 };
 
@@ -31,16 +32,17 @@ int isQueueEmpty(QUEUE *root)
 	}
 }
 
-void initQueue(QUEUE *root)
+void initQueue(QUEUE *root, char priorityNum)
 {
 	root->head = NULL;
 	root->tail = NULL;
 	root->numOfElements = 0;
+	root->priority = priorityNum;
 }
 
 QLINK returnQueueElement()
 {
-	return malloc(sizeof(QLINK) * 1);
+	return calloc(1, sizeof(QLINK));
 }
 
 void enqueue(QUEUE *root, QDATA var)
