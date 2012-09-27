@@ -1,0 +1,32 @@
+/*Created by Randy White
+	testing the priority queue stuff
+*/
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h> //make sure to build with param -lpthread
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>              /* Obtain O_* constant definitions */
+#include <errno.h>
+#include <syslog.h>
+#include <string.h> //make sure the string library is here
+#include <signal.h>
+
+#include "data_structures/queue.h" //will only be using the queue library
+#include "data_structures/btree.h" //binary tree stuff
+#include "data_structures/pqueue.h" //priority queue stufff
+
+
+
+
+
+void main()
+{
+	PQUEUE rootNode = NULL; //make sure this is null right here
+	QUEUE tempNode; 
+	addToPQueueAndSort(rootNode,&tempNode);
+   //testing the priority queue implementation
+}
