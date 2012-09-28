@@ -14,6 +14,7 @@ struct queue
 {
 	QLINK head, tail;
 	int numOfElements;
+	int directive; //this will be used for directives of the queue
 	char priority; //this is the actual priority of the queue
 	
 };
@@ -32,12 +33,13 @@ int isQueueEmpty(QUEUE *root)
 	}
 }
 
-void initQueue(QUEUE *root, char priorityNum)
+void initQueue(QUEUE *root, char priorityNum, int directivePassed)
 {
 	root->head = NULL;
 	root->tail = NULL;
 	root->numOfElements = 0;
 	root->priority = priorityNum;
+	root->directive = directivePassed;
 }
 
 QLINK returnQueueElement()

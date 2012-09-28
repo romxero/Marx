@@ -21,14 +21,16 @@
 #include <sys/time.h>
 #include <netdb.h> //this has some structures to pass a host to this to the client program.
 #include <sys/epoll.h>
-
+#include "constant_definitions.h" //this is used for self modifying code and other things
 
 #include "benchmark.h"
-#include "data_structures/btree.h"
 #include "data_structures/queue.h" //will only be using the queue library
+#include "data_structures/pqueue.h" //will only be using the queue library
+#include "data_structures/btree.h"
+
 
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
-#include "constant_definitions.h" //this is used for self modifying code and other things
+
 #include "socketConnections.h"
 
 /*Define Constant Macros */
@@ -47,6 +49,11 @@ char const *portNumChar = "65000";
 
 int main(int argc, char **argv)
 {
+	if (!(argv[1]))
+	{
+		puts("You forgot the hostname!");
+		return -1;
+	}
 	/* Getting all the client stuff ready */
 	uint loopPthreadCounter = 0;
 	int sockfd, portno, n;
@@ -90,12 +97,71 @@ int main(int argc, char **argv)
 				  sendVar = QUEUE_JOBS;
 				  
 				  send(sockfd,sendVarPtr,sizeof(int),0);
+				  //~ SEND_PRIORITY_NUM
+				  //~ SEND_DIRECTIVE
+				  //~ READY_FOR_JOBS
+				  recv(sockfd,recieveVarPtr,sizeof(int),0);
+				  if (recieveVar == SEND_PRIORITY_NUM)
+				  {
+					  sendMessage(sockfd,"3");
+				
+				  }
 				  
 				  recv(sockfd,recieveVarPtr,sizeof(int),0);
+				  if (recieveVar == SEND_DIRECTIVE)
+				  {
+					  
+						sendVar = ROUND_ROBIN;
+				  
+						send(sockfd,sendVarPtr,sizeof(int),0);
+					  //~ sendMessage(sockfd,"procinfo");
+				
+				  }
+				  
+				  recv(sockfd,recieveVarPtr,sizeof(int),0);
+				  
 				  if (recieveVar == READY_FOR_JOBS)
 				  {
 					  sendMessage(sockfd,"procinfo");
-					  //~ sendMessage(sockfd,"uname -a");
+					   
+					   recv(sockfd,recieveVarPtr,sizeof(int),0);
+					   
+					   if (recieveVar == RECIEVED_OK)
+					   {
+						sendVar = ZERO_OUT_VALUE;
+						send(sockfd,sendVarPtr,sizeof(int),0);
+						sendMessage(sockfd,"uname -rms");   
+					   }
+					   recv(sockfd,recieveVarPtr,sizeof(int),0);
+					   
+					   if (recieveVar == RECIEVED_OK)
+					   {
+						sendVar = ZERO_OUT_VALUE;
+						send(sockfd,sendVarPtr,sizeof(int),0);
+						sendMessage(sockfd,"ps -A");
+					   }
+					   
+					   recv(sockfd,recieveVarPtr,sizeof(int),0);
+					   if (recieveVar == RECIEVED_OK)
+					   {
+						sendVar = QUEUE_JOBS_END;
+					  send(sockfd,sendVarPtr,sizeof(int),0);
+					
+					   }
+					  
+				
+				  }
+				  
+				
+				 
+				close(sockfd);
+				
+				
+
+}
+
+
+	  //~ sendMessage(sockfd,"uname -a");
 					  //~ sendMessage(sockfd,"set");
 					  
 					  //~ sendVar = QUEUE_JOBS_END;
@@ -108,12 +174,3 @@ int main(int argc, char **argv)
 					  //~ sendVar = DISTRIBUTE_ROUND_ROBIN;
 				  //~ 
 				  //~ send(sockfd,sendVarPtr,sizeof(int),0);
-				  }
-				  
-				
-				 
-				close(sockfd);
-				
-				
-
-}

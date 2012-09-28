@@ -111,13 +111,13 @@ int sendMessage(int sockfd,char const *message)
 
 char* recieveMessage(int sockfd)
 {
-	//~ char buffer[256];
-	//~ bzero(buffer,256);
-	char *message = (char *) malloc(256 * sizeof(char));
+	char buffer[256];
+	bzero(buffer,256);
+	//~ char *message = (char *) malloc(256 * sizeof(char));
 	int n = 0;
 	//~ int strLength;
 	//~ strLength = strlen(message);
-	n = recv(sockfd,message,256,0); 
+	n = recv(sockfd,buffer,256,0); 
 	
 	if (n < 0) 
 	{
@@ -126,12 +126,45 @@ char* recieveMessage(int sockfd)
 		
 	
 	}
-	//~ strcpy(message,buffer);
+	char *message = (char *) malloc(n * sizeof(char)); //make this the same size as recieved data
+	buffer[n] = '\0';
+	strcpy(message,buffer);
+	//~ char *message = buffer;
+	
 	return message;
 }
+/* These are wrapper functions for the mundane tasks */ 
+int reciveJobs()
+{
+	
+}
+int sendJobs()
+{
+	
+}
+int sendQueueProcess()
+{
+	
+}
 
+int recieveQueueProcess()
+{
+	
+}
 
-int serverFunction(int socket, BTREE *root, QUEUE *jobQueue, char *loopVar)
+int recieveAddPeer()
+{
+	
+	
+}
+
+int sendAddPeer()
+{
+	
+}
+/* End of wrapper functions for mundane tasks */
+
+int serverFunction(int socket, BTREE *root, PQ *jobQueue, char *loopVar)
 {
 	
 								//these are where the server functions are
@@ -186,6 +219,7 @@ int serverFunction(int socket, BTREE *root, QUEUE *jobQueue, char *loopVar)
 											
 											
 										}
+									
 									break;
 									}
 									case QUEUE_JOBS:
@@ -193,19 +227,47 @@ int serverFunction(int socket, BTREE *root, QUEUE *jobQueue, char *loopVar)
 										
 										//queue jobs right here
 										char *jobs;
+										char priorityNumber;
+										int directive;
+										
+										sendVar = SEND_PRIORITY_NUM; //send the priority of tasks
+										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+										errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+										priorityNumber = (char)recieveVar;
+										
+										
+										sendVar = SEND_DIRECTIVE;
+										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+										errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+										directive = recieveVar;
+										
 										sendVar = READY_FOR_JOBS;
 										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
 										
-										//~ while(recieveVar != QUEUE_JOBS_END)
-										//~ {
-												//~ recieveVar = ZERO_OUT_VALUE;
+										//~ //use these for recieving ok
+										//~ sendVar = RECIEVED_OK;
+										//~ errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+										//~ 
+										PQUEUE tempQueue = returnPQueueElement();
+										
+										initQueue(tempQueue,priorityNumber,directive);
+										
+										recieveVar = ZERO_OUT_VALUE;
+										
+										while(recieveVar != QUEUE_JOBS_END)
+										{
 												jobs = recieveMessage(socket);
-												if (*root != NULL)
+												if (jobs == "null")
 												{
-												
-												functionPointer = &launchJobs; //remove all elements
-												traverseBTree(*root,POST_ORDER, jobs, functionPointer);
+													//~ sendVar = RECIEVED_ERROR;
+													errorTrap = send(socket,sendVarPtr,sizeof(int),0);
 												}
+												enqueue(tempQueue,jobs);
+												
+												sendVar = RECIEVED_OK;
+												errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+									//~ #define RECIEVED_OK 0x0004 //this should be very important			
+												
 												//~ enqueue(jobQueue,recieveMessage(socket));
 												
 												//~ errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
@@ -213,9 +275,13 @@ int serverFunction(int socket, BTREE *root, QUEUE *jobQueue, char *loopVar)
 												//~ {
 													//~ continue;
 												//~ }
+												errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
 											
-										//~ }
+										}
 										
+										pQueueAdd(jobQueue,tempQueue);
+				
+				
 										//~ recieveVar = ZERO_OUT_VALUE;
 										//~ errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
 										//~ 
@@ -287,21 +353,31 @@ int peerFunction(int socket, char *loopVar)
 									case SEND_JOB:
 									{
 									char *job = recieveMessage(socket);
-									 
-									int errorTrap = system(job);
-									if (errorTrap < 0)
+									if (job == "null")
 									{
-										//an error has been sent
-											sendVar = JOB_RECIEVED_ERROR;
-											errorTrap = send(socket,sendVarPtr,sizeof(int),0);
-									}
-									else
-									{
-											sendVar = JOB_RECIEVED_OK;
+											sendVar = RECIEVED_ERROR;
 											errorTrap = send(socket,sendVarPtr,sizeof(int),0);
 										
 									}
-										free(job);
+									else
+									{
+											sendVar = RECIEVED_OK;
+											errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+											int errorTrap = system(job); //the job gets launched here
+													if (errorTrap < 0)
+													{
+														//an error has been sent
+															
+													}
+													else
+													{
+														//something over here	
+														
+													}
+										
+									}
+									
+										free(job); //free the string
 									break;
 									
 									}

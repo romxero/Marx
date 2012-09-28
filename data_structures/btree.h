@@ -56,7 +56,7 @@ int freeMemInBTree(BTREE root)
 }
 
 
-void traverseBTree(BTREE root, const char DIRECTIVE, char *jobs, int (*functionPointer)(BTREE root, char *jobs))
+void traverseBTree(BTREE root, const char DIRECTIVE, PQUEUE jobs, int (*functionPointer)(BTREE root, PQUEUE jobs))
 {
 		
 		if (root != NULL)
@@ -226,7 +226,7 @@ int displayHostnames(BTREE root, char *jobs)
 	
 }
 
-int launchJobs(BTREE root, char *jobs)
+int launchJobs(BTREE root, PQUEUE jobs)
 {
 	LINK tempList = root->serverList;
 	
@@ -236,17 +236,53 @@ int launchJobs(BTREE root, char *jobs)
 	}
 	else
 	{
-			while(!(tempList == NULL))
-			{
-				//~ SEND_JOB
+		
 				int sendVar = SEND_JOB;
 				int *sendVarPtr = &sendVar;
+				
+				int recieveVar = ZERO_OUT_VALUE;
+				int *recieveVarPtr = &recieveVar;
+				
+				int errorTrap = 0;
+		while(jobs->numOfElements != 0)
+		{		
+			//~ (!(tempList == NULL))
+			
+				//~ SEND_JOB
+				
 				send(tempList->peerSocket,sendVarPtr,sizeof(int),0);
-				sendMessage(tempList->peerSocket,jobs);
+			
+				sendMessage(tempList->peerSocket,jobs->head->value); //this is the command
 				
-				tempList = tempList->next;
+				errorTrap = recv(tempList->peerSocket,recieveVarPtr,sizeof(int),0);
+				if (errorTrap < 0)
+				{
+					
+					
+				}
+				if (recieveVar == RECIEVED_OK)
+				{
+							if (tempList->next != NULL)
+						{
+							tempList = tempList->next;
+						}
+						else
+						{
+							if (tempList->front != NULL)
+							{
+								tempList = tempList->front;
+							}
+						}
+						dequeue(jobs);
+					
+				}
+				else
+				{
+					return -1;
+				}
 				
-			}
+			
+		}
 	}
 	
 }

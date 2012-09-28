@@ -30,8 +30,9 @@
 
 #include "constant_definitions.h" //this is used for self modifying code and other things
 #include "data_structures/queue.h" //will only be using the queue library
-#include "data_structures/btree.h" //binary tree stuff
 #include "data_structures/pqueue.h" //priority queue stufff
+#include "data_structures/btree.h" //binary tree stuff
+
 
 #include "etc_functions.h" // misc functions
 
@@ -65,7 +66,7 @@ struct threadData
 {
 	int networkSocket;
 	BTREE *btreeNode;
-	QUEUE *mainQueue;
+	PQ mainQueue;
 	char *breakLoopPtr;
 	
 	
@@ -77,7 +78,7 @@ void *threadWrapper(void *threadParameters)
 	struct threadData *DataForFunction;
 	DataForFunction = (struct threadData *) threadParameters;
 	
-	serverFunction(DataForFunction->networkSocket,DataForFunction->btreeNode,DataForFunction->mainQueue,DataForFunction->breakLoopPtr); //main server function
+	//~ serverFunction(DataForFunction->networkSocket,DataForFunction->btreeNode,DataForFunction->mainQueue,DataForFunction->breakLoopPtr); //main server function
 	pthread_exit(NULL);
 	
 }
@@ -125,9 +126,13 @@ int main(int argc, char **argv)
 					/* Main event loop stuff */
 					int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff	
 					static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
-					QUEUE jobQueue;
+					
 					QUEUE *priorityQueue = NULL; //this is the main priority queue 
-					initQueue(&jobQueue,1);
+					//~ initQueue(&jobQueue,1);
+					
+					PQ jobQueue; //this is the priority queue
+					initPqueue(&jobQueue); //initialize the queue
+					
 					int errorTrap; //used to find errors in the code
 					
 					
@@ -149,14 +154,16 @@ int main(int argc, char **argv)
 								
 								int i = 0;
 								
-								for (; i < numCPU; i++)
-								{
-									serverDataForPthreads[i].networkSocket = -1;
-									serverDataForPthreads[i].btreeNode = &rootNode;
-									serverDataForPthreads[i].mainQueue = &jobQueue;
-									serverDataForPthreads[i].breakLoopPtr = terminateAppPtr;
-									
-								}
+								
+								/* For threading */
+								//~ for (; i < numCPU; i++)
+								//~ {
+									//~ serverDataForPthreads[i].networkSocket = -1;
+									//~ serverDataForPthreads[i].btreeNode = &rootNode;
+									//~ serverDataForPthreads[i].mainQueue = &jobQueue;
+									//~ serverDataForPthreads[i].breakLoopPtr = terminateAppPtr;
+									//~ 
+								//~ }
 
 							while(terminateApp < 0)
 							{
@@ -169,8 +176,31 @@ int main(int argc, char **argv)
 										
 										serverDataForPthreads[threadCounter].networkSocket = newsockfd;
 										
-										//~ serverFunction(newsockfd,&rootNode,&jobQueue,terminateAppPtr); //main server function
-										pthread_create (&threads[threadCounter], NULL, (void *) &threadWrapper, (void *) &serverDataForPthreads[threadCounter]);
+										serverFunction(newsockfd,&rootNode,&jobQueue,terminateAppPtr); //main server function
+										//~ pthread_create (&threads[threadCounter], NULL, (void *) &threadWrapper, (void *) &serverDataForPthreads[threadCounter]);
+										
+										
+										while (jobQueue.count > 0)
+										{
+											sortThePQueue(&jobQueue);
+											if (rootNode == NULL)
+											{
+												puts("There are no peers connected to the server\n");
+												break;
+											}
+											else
+											{
+												functionPointer = &launchJobs; //remove all elements
+												
+												traverseBTree(rootNode,POST_ORDER, jobQueue.QueueArray[0], functionPointer);
+												removeFromPQueue(&jobQueue); //removes the top element in priority queue
+											}
+												
+												
+											
+										}
+										
+										
 										threadCounter++; //increment the thread counter
 										continue;
 										

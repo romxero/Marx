@@ -24,8 +24,10 @@
 
 #include "constant_definitions.h" //this is used for self modifying code and other things
 #include "benchmark.h"
-#include "data_structures/btree.h"
 #include "data_structures/queue.h" //will only be using the queue library
+#include "data_structures/pqueue.h"
+#include "data_structures/btree.h"
+ //will only be using the queue library
 
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
 

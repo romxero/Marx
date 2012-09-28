@@ -6,6 +6,7 @@ struct linkedList
 {
 	HOSTNAME hostname;
 	int peerSocket;
+	char blacklist; //this is used to black list a server
 	struct linkedList *next;
 	struct linkedList *front;
 	
@@ -18,6 +19,7 @@ void initLinkedList(LINK root, HOSTNAME var, int socket)
 {
 	root->next = NULL;
 	root->hostname = var;
+	root->blacklist = 0;
 	root->peerSocket = socket;
 	root->front = NULL;
 }

@@ -52,6 +52,37 @@ void main()
 					
 						pq->count = 0; //make sure to set the count to zero
 	}		
+	
+	
+		void sortThePQueue(struct priorityQueueStructure *pq)
+		{
+			
+			int i = 0;
+			int k = 0; //incrementer 
+			//~ int k; //incrementer 
+				for (; i < pq->count; i++)
+				{
+						k = 0;
+							for (; k < pq->count; k++)
+							{
+								if(pq->QueueArray[k+1] != NULL)
+								{
+									
+									if(pq->QueueArray[k+1]->priority < pq->QueueArray[k]->priority)
+									{
+										PQUEUE temp = pq->QueueArray[k];
+										pq->QueueArray[k] = pq->QueueArray[k+1];
+										pq->QueueArray[k+1] = temp;
+										
+										
+										//finish
+									}
+								}
+							}
+							
+				}
+			//this is used for sorting the p queue
+		}
 			int pQueueAdd(struct priorityQueueStructure *pq, QUEUE *passedQueue)
 			{
 				
@@ -75,41 +106,87 @@ void main()
 				
 			}
 				
+				
+			int removeFromPQueue(struct priorityQueueStructure *pq)
+			{
+				if (pq->QueueArray[0] == NULL)
+				{
+					
+					return -1;
+				}
+				
+				else if (pq->QueueArray[0]->numOfElements == 0)
+				{
+					
+					pq->QueueArray[0] = NULL;
+					
+					
+				//~ int i = 0;
+					//~ 
+					//~ for (; i < pq->count ; i++)
+					//~ {
+						int k = 0;
+						for (; k < pq->count ; k++)
+						{
+								if (pq->QueueArray[k] != NULL)
+								{
+									pq->QueueArray[k-1] = pq->QueueArray[k];
+									pq->QueueArray[k] = NULL;
+									
+								}
+						}
+						
+					//~ }
+					pq->count--; //decrement
+					return 1;
+				}
+				
+				else
+				{
+					
+					
+					return -1;
+				}
+				
+				
+				
+			}	
+				
+				
+				
+				
+				
+				
+				
 				PQ pq; //this is the priority queue
 				initPqueue(&pq);
+	
 				QUEUE tempNode; 
 				QUEUE tempNode0; 
 				QUEUE tempNode1; 
 
-	initQueue(&tempNode,0);
+
+	initQueue(&tempNode,3);
 	enqueue(&tempNode,"Hello");
 	
 	initQueue(&tempNode0,1);
 	enqueue(&tempNode0,"Sorry");
 	
-	initQueue(&tempNode1,2);
+	initQueue(&tempNode1,0);
 	enqueue(&tempNode1,"Bye");
+	
 	
 	pQueueAdd(&pq,&tempNode);//wait for it
 	pQueueAdd(&pq,&tempNode0);//wait for it
 	pQueueAdd(&pq,&tempNode1);//wait for it
+	sortThePQueue(&pq);
+	dequeue(&tempNode1);
+	removeFromPQueue(&pq);
 	
+	dequeue(&tempNode0);
+	removeFromPQueue(&pq);
 	
-	//~ pq.QueueArray[0] = &tempNode;
-	//~ pq.QueueArray[1] = &tempNode0;
-	//~ pq.QueueArray[2] = &tempNode1;
-	//~ 
+	dequeue(&tempNode);
+	removeFromPQueue(&pq);
 	
-	
-	//~ pQStruct rootNode;
-	//~ rootNode.pQueue = NULL; // null out the priority queue
-	
-	//~ PQUEUE rootNode = NULL; //make sure this is null right here
-	
-	
-	
-	//~ addToPQueueAndSort(&rootNode,&tempNode);
-	//~ addToPQueueAndSort(&rootNode,&tempNode0);
-	//~ addToPQueueAndSort(&rootNode,&tempNode1);
-   //~ //testing the priority queue implementation
 }
