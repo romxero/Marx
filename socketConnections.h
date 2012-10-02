@@ -183,6 +183,10 @@ int serverFunction(int socket, BTREE *root, PQ *jobQueue, char *loopVar)
 									{
 									sendVar = SEND_HOSTNAME;
 									errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+									if (errorTrap < 0)
+									{
+										
+									}
 									char *hostName;
 									int returnedBenchScore = 1000;
 									hostName = recieveMessage(socket);
