@@ -1,0 +1,6 @@
+ls -a
+ps -A
+uname -rms
+echo hello
+set
+hostname

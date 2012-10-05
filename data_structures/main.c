@@ -1,47 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "btree.h"
-#define VARIANCE 500
+
+#include "../constant_definitions.h" //this is used for self modifying code and other things
+#include "queue.h" //will only be using the queue library
+#include "pqueue.h" //priority queue stufff
+//~ #include "btree.h" //binary tree stuff
+
 
 void main()
 {
 			
-			char *string = getenv("HOSTNAME");
-			int (*fp)(); //function pointer
-			BTREE rootNode = newNode(); //
-			int errorTrap = 0;
-			bTreeInit(rootNode, 1000, string);
-			fp = &addHostnameToBTree; //add function pointer
-			searchBtree(rootNode,1000,string,VARIANCE,fp);
-			searchBtree(rootNode,1000,"Ryan",VARIANCE,fp);
-			searchBtree(rootNode,500,"Calvin",VARIANCE,fp);
 			
 			
-			errorTrap = searchBtree(rootNode,5,"Darla",VARIANCE,fp);
+			struct priorityQueueContainer jobQueue;
+			initializePQueue(&jobQueue);
+			PQUEUE test1 = returnPQueueElement();
+			PQUEUE test2 = returnPQueueElement();
+			PQUEUE test3 = returnPQueueElement();
+			PQUEUE test4 = returnPQueueElement();
+			PQUEUE test5 = returnPQueueElement();
+			PQUEUE test6 = returnPQueueElement();
+			PQUEUE test7 = returnPQueueElement();
+			initQueue(test1,1,ROUND_ROBIN);
+			initQueue(test2,2,ROUND_ROBIN);
+			initQueue(test3,3,ROUND_ROBIN);
+			initQueue(test4,4,ROUND_ROBIN);
+			initQueue(test5,5,ROUND_ROBIN);
+			initQueue(test6,6,ROUND_ROBIN);
+			initQueue(test7,7,ROUND_ROBIN);
+			pEnqueue(&jobQueue,test1);
+			pEnqueue(&jobQueue,test2);
+			pEnqueue(&jobQueue,test3);
+			pEnqueue(&jobQueue,test4);
+			pEnqueue(&jobQueue,test5);
+			pEnqueue(&jobQueue,test6);
+			pEnqueue(&jobQueue,test7);
+			pDequeue(&jobQueue);
+			pDequeue(&jobQueue);
+			pDequeue(&jobQueue);
+			pDequeue(&jobQueue);
+			pDequeue(&jobQueue);
+			pDequeue(&jobQueue);
+			pDequeue(&jobQueue);
+			pDequeue(&jobQueue);
 			
-			if(errorTrap < 0)
-			{
-				addToTree(rootNode,5,"Kevin");
-			}
-			searchBtree(rootNode,5,"Steve",VARIANCE,fp);
-			
-			//~ printf("%d\n",rootNode->benchscore);
-			//~ puts(rootNode->serverList->hostname);
-			
-			
-			fp = &displayHostnames; //display the names of stuff
-			
-			//~ (*fp)("%s\n",rootNode->serverList->hostname);
-			traverseBTree(rootNode,INORDER,fp);
-			
-			
-			fp = &freeMemInBTree; //remove all elements
-			
-			traverseBTree(rootNode,POST_ORDER,fp);
-			
-			//~ free(fp);
-			//~ free(rootNode);
-			//~ releaseBTreeData(rootNode); //releases the data
-
 }

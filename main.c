@@ -17,10 +17,6 @@
 #include <string.h> //make sure the string library is here
 #include <signal.h>
 
-#include <linux/futex.h>
-#include <sys/time.h>
-#include <sys/epoll.h>
-
 
 #include <sys/types.h> 
 #include <arpa/inet.h>
@@ -32,24 +28,20 @@
 #include "data_structures/queue.h" //will only be using the queue library
 #include "data_structures/pqueue.h" //priority queue stufff
 #include "data_structures/btree.h" //binary tree stuff
-
-
+#include "configFile.h" //for the configuration file
 #include "etc_functions.h" // misc functions
-
-
 #include "benchmark.h"
-
 #include "socketConnections.h"
 
 /*Define Constant Macros */
 
 #define appName "Marx Server" //application name
 #define appVers ".25" //alpha version 
-#define maxConnections 1024 // this will be used for the maximum connections to this server
-#define maxThreads 64 //might increase depending on the processor
+
+
 #define portNum "65000" //this is the default port number for the process
 #define VARIANCE 500 //this is used for the variaince within searchin of the binary tree
-#define defaultConfigFile '/etc/marxd.conf' //this is the default configuration file for the daemon process
+#define defaultConfigFile "/etc/marxd.conf" //this is the default configuration file for the daemon process
 
 char terminateApp = -1; //this is used to terminate the application
 char *terminateAppPtr = &terminateApp; //this is a pointer used to terminate the application
@@ -89,7 +81,7 @@ typedef unsigned int uint; //use this for an unsigned interger
 
 int main(int argc, char **argv)
 {
-
+				
 				/* Multi-threading stuff */
 				int numCPU = sysconf( _SC_NPROCESSORS_ONLN );  
 				if (numCPU < 0) {quitWithError("Couldn't get correct CPU count!!");}//this gets the number of cpus
@@ -102,10 +94,15 @@ int main(int argc, char **argv)
 				
 				
 				
-				
+					/* Configuration and forking stuff */
+					struct configurationFile configFileData; //the configuration file data
+					
 				
 					pid_t pid, sid, cpid; // this is the pid for our daemon process
-					
+					if (processConfigFile(&configFileData,defaultConfigFile) < 0)
+					{
+							puts("No configuration file detected, using default attributes\n");
+					}
 					
 					/* Socket Stuff */ 
 					int sockfd, newsockfd, portno; //for socket return values
@@ -129,10 +126,12 @@ int main(int argc, char **argv)
 					
 					QUEUE *priorityQueue = NULL; //this is the main priority queue 
 					//~ initQueue(&jobQueue,1);
-					
-					PQ jobQueue; //this is the priority queue
-					initPqueue(&jobQueue); //initialize the queue
-					
+					//~ 
+					//~ PQ jobQueue; //this is the priority queue
+					//~ initPqueue(&jobQueue); //initialize the queue
+					//~ 
+					struct priorityQueueContainer jobQueue;
+					initializePQueue(&jobQueue);
 					int errorTrap; //used to find errors in the code
 					
 					
@@ -167,6 +166,7 @@ int main(int argc, char **argv)
 
 							while(terminateApp < 0)
 							{
+								//main loop
 								if (threadCounter > numCPU) {threadCounter = 0;} //make sure it goes back to zero
 								
 									newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
@@ -176,13 +176,19 @@ int main(int argc, char **argv)
 										
 										serverDataForPthreads[threadCounter].networkSocket = newsockfd;
 										
-										serverFunction(newsockfd,&rootNode,&jobQueue,terminateAppPtr); //main server function
+										errorTrap = serverFunction(newsockfd,&rootNode,&jobQueue,terminateAppPtr); //main server function
+											if (errorTrap < 0)
+											{
+											  puts("Connection error with a peer/client!");
+											  
+											}
 										//~ pthread_create (&threads[threadCounter], NULL, (void *) &threadWrapper, (void *) &serverDataForPthreads[threadCounter]);
 										
 										
 										while (jobQueue.count > 0)
 										{
-											sortThePQueue(&jobQueue);
+											//inner loop for job queue
+											
 											if (rootNode == NULL)
 											{
 												puts("There are no peers connected to the server\n");
@@ -192,8 +198,8 @@ int main(int argc, char **argv)
 											{
 												functionPointer = &launchJobs; //remove all elements
 												
-												traverseBTree(rootNode,POST_ORDER, jobQueue.QueueArray[0], functionPointer);
-												removeFromPQueue(&jobQueue); //removes the top element in priority queue
+												traverseBTree(rootNode,POST_ORDER, jobQueue.head->queueElement, functionPointer);
+												pDequeue(&jobQueue); //removes the top element in priority queue
 											}
 												
 												

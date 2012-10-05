@@ -69,6 +69,7 @@ int dequeue(QUEUE *root)
 	
 	if (isQueueEmpty(root) > 0)
 	{
+		
 			return -1;
 	}
 	else
@@ -77,6 +78,10 @@ int dequeue(QUEUE *root)
 		free(root->head);
 		root->head = temp;
 		root->numOfElements--;
+		if (root->head == NULL)
+		{
+			root->tail = NULL;
+		}
 		
 	}
 

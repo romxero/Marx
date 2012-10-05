@@ -21,13 +21,13 @@
 #include <sys/time.h>
 #include <netdb.h> //this has some structures to pass a host to this to the client program.
 #include <sys/epoll.h>
-
 #include "constant_definitions.h" //this is used for self modifying code and other things
+
 #include "benchmark.h"
 #include "data_structures/queue.h" //will only be using the queue library
-#include "data_structures/pqueue.h"
+#include "data_structures/pqueue.h" //will only be using the queue library
 #include "data_structures/btree.h"
- //will only be using the queue library
+
 
 #include "etc_functions.h" // this is for the binary ~ non cascade!! 
 
@@ -42,7 +42,7 @@
 #define portNum 65000 //this is the default port number for the process
 #define defaultConfigFile '/etc/marx.conf' //this is the default file for the client process
 char const *portNumChar = "65000";
-char terminateApp = -1; // this is used to terminate the app
+
 
 
 
@@ -54,9 +54,61 @@ int main(int argc, char **argv)
 		puts("You forgot the hostname!");
 		return -1;
 	}
-	/* Getting all the client stuff ready */
+	if (!(argv[2]))
+	{
+		puts("You forgot the file!");
+		return -1;
+	}
+	
+	FILE *fp;
+	char *line;
+	int jobCount = 0;
+	char ch='\0';
+	
+	size_t len = 0;
+	ssize_t read;
+
+	//~ fp = fopen("/","r");
+	fp=fopen(argv[2], "r") ;
+	//~ 
+	if (fp == NULL)
+	{
+		puts("No File");
+		return -1;
+	}
+	
+	 while(ch!=EOF) {
+		ch=fgetc(fp);
+		if(ch=='\n')  
+		{
+		jobCount++;
+		}
+	  }
+	  char *jobs[jobCount];
+	  fclose(fp);
+	
+		fp=fopen(argv[2], "r") ;
+		
+		if (fp == NULL)
+		{
+			return -1;
+		}	  
+	  int i = 0;
+	  while ((read = getline(&line, &len, fp)) != -1) {
+               //~ printf("Retrieved line of length %zu :\n", read);
+               //~ printf("%s", line);
+               jobs[i] = calloc(1,sizeof(line));
+               strcpy(jobs[i],line);
+               i++;
+           }
+           
+           i = 0;
+
+	 
+	   fclose(fp);
+	   
+	   /* Getting all the client stuff ready */
 	uint loopPthreadCounter = 0;
-	int errorTrap = 1; // this is used to catch errors, set it to => 1 to begin with 
 	int sockfd, portno, n;
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
@@ -94,20 +146,74 @@ int main(int argc, char **argv)
 				  
 				  int recieveVar = ZERO_OUT_VALUE;
 				  int *recieveVarPtr = &recieveVar;
-
-				  sendVar = NEW_PEER;
+		
+				  sendVar = QUEUE_JOBS;
+				  
 				  send(sockfd,sendVarPtr,sizeof(int),0);
+				  //~ SEND_PRIORITY_NUM
+				  //~ SEND_DIRECTIVE
+				  //~ READY_FOR_JOBS
+				  recv(sockfd,recieveVarPtr,sizeof(int),0);
+				  if (recieveVar == SEND_PRIORITY_NUM)
+				  {
+					  sendMessage(sockfd,"3");
+				
+				  }
 				  
+				  recv(sockfd,recieveVarPtr,sizeof(int),0);
+				  if (recieveVar == SEND_DIRECTIVE)
+				  {
+					  
+						sendVar = ROUND_ROBIN;
 				  
-				while(boolBreakLoop < 0)
-				{  
-					
-					
-						peerFunction(sockfd,boolBreakLoopPtr);
-				}
+						send(sockfd,sendVarPtr,sizeof(int),0);
+					  //~ sendMessage(sockfd,"procinfo");
+				
+				  }
+				  
+				  recv(sockfd,recieveVarPtr,sizeof(int),0);
+				  
+				  if (recieveVar == READY_FOR_JOBS)
+				  {
+					  
+					  
+					   i = 0;
+					  for (; i < jobCount; i++)
+					  {
+						  sendMessage(sockfd,jobs[i]);
+						  recv(sockfd,recieveVarPtr,sizeof(int),0);
+						   if (recieveVar == RECIEVED_OK)
+							{
+								if (i == (jobCount - 1))
+								{
+									sendVar = QUEUE_JOBS_END;
+								}
+								else
+								{
+									
+									sendVar = ZERO_OUT_VALUE;
+								}
+								send(sockfd,sendVarPtr,sizeof(int),0);
+								
+							}
+					  }
+					  
+					   //~ if (recieveVar == RECIEVED_OK)
+					   //~ {
+						//~ sendVar = QUEUE_JOBS_END;
+						//~ send(sockfd,sendVarPtr,sizeof(int),0);
+					//~ 
+					   //~ }
+					  
+				
+				  }
+				  
+				
 				 
 				close(sockfd);
 				
 				
 
-}
+
+	}
+

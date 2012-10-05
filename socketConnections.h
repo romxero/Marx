@@ -164,11 +164,11 @@ int sendAddPeer()
 }
 /* End of wrapper functions for mundane tasks */
 
-int serverFunction(int socket, BTREE *root, PQ *jobQueue, char *loopVar)
+int serverFunction(int socket, BTREE *root, struct priorityQueueContainer *jobQueue, char *loopVar)
 {
 	
 								//these are where the server functions are
-								int errorTrap = 1;
+								int errorTrap = 1; //sets the error trap to 1, so things wont get hairy below when we first start
 								
 								int sendVar = ZERO_OUT_VALUE;
 								int *sendVarPtr = &sendVar;
@@ -185,20 +185,34 @@ int serverFunction(int socket, BTREE *root, PQ *jobQueue, char *loopVar)
 									errorTrap = send(socket,sendVarPtr,sizeof(int),0);
 									if (errorTrap < 0)
 									{
-										
+										return -1;
+										//an error happened
 									}
 									char *hostName;
 									int returnedBenchScore = 1000;
 									hostName = recieveMessage(socket);
-									
+									if (hostName == "null")
+									{
+										return -1;
+										//an error happened
+									}
 									//send for the benchscore
 									
 									sendVar = SEND_BENCHSCORE;
 									errorTrap = send(socket,sendVarPtr,sizeof(int),0);
-									
+										if (errorTrap < 0)
+									{
+										return -1;
+										//an error happened
+									}
 									recieveVar = ZERO_OUT_VALUE;
 									
 									errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+										if (errorTrap < 0)
+									{
+										return -1;
+										//an error happened
+									}
 									returnedBenchScore = recieveVar; //this is used for benchscore
 									
 									recieveVar = ZERO_OUT_VALUE;
@@ -215,7 +229,7 @@ int serverFunction(int socket, BTREE *root, PQ *jobQueue, char *loopVar)
 											errorTrap  = searchBtree(*root,returnedBenchScore,hostName,500,socket,functionPointer);
 											if (errorTrap < 0)
 											{
-												
+													//searching did not produce a good variance so a new tree node is to be added
 												//add a new node
 												addToTree(*root,returnedBenchScore,hostName,socket);
 											}
@@ -236,17 +250,42 @@ int serverFunction(int socket, BTREE *root, PQ *jobQueue, char *loopVar)
 										
 										sendVar = SEND_PRIORITY_NUM; //send the priority of tasks
 										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+											if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
 										errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+											if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
 										priorityNumber = (char)recieveVar;
 										
 										
 										sendVar = SEND_DIRECTIVE;
 										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+										if (errorTrap < 0)
+										{
+											return -1;
+											//an error happened
+										}
 										errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+										if (errorTrap < 0)
+										{
+											return -1;
+											//an error happened
+										}
 										directive = recieveVar;
 										
 										sendVar = READY_FOR_JOBS;
 										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+											if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
 										
 										//~ //use these for recieving ok
 										//~ sendVar = RECIEVED_OK;
@@ -270,6 +309,11 @@ int serverFunction(int socket, BTREE *root, PQ *jobQueue, char *loopVar)
 												
 												sendVar = RECIEVED_OK;
 												errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+												if (errorTrap < 0)
+													{
+														return -1;
+														//an error happened
+													}
 									//~ #define RECIEVED_OK 0x0004 //this should be very important			
 												
 												//~ enqueue(jobQueue,recieveMessage(socket));
@@ -283,7 +327,7 @@ int serverFunction(int socket, BTREE *root, PQ *jobQueue, char *loopVar)
 											
 										}
 										
-										pQueueAdd(jobQueue,tempQueue);
+										pEnqueue(jobQueue,tempQueue);
 				
 				
 										//~ recieveVar = ZERO_OUT_VALUE;
@@ -341,17 +385,32 @@ int peerFunction(int socket, char *loopVar)
 								int *recieveVarPtr = &recieveVar;
 								
 								errorTrap = recv(socket,recieveVarPtr,sizeof(int),0);
+											if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
 								 switch(recieveVar)
 								{
 									case SEND_HOSTNAME:
 									{
 									errorTrap = sendMessage(socket,getenv("HOSTNAME"));
+									if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
 									break;
 									}
 									case SEND_BENCHSCORE:
 									{
 										sendVar = benchMark();
 										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+										if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
 										break; 
 									}
 									case SEND_JOB:
@@ -361,13 +420,23 @@ int peerFunction(int socket, char *loopVar)
 									{
 											sendVar = RECIEVED_ERROR;
 											errorTrap = send(socket,sendVarPtr,sizeof(int),0);
+											if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
 										
 									}
 									else
 									{
 											sendVar = RECIEVED_OK;
 											errorTrap = send(socket,sendVarPtr,sizeof(int),0);
-											int errorTrap = system(job); //the job gets launched here
+											if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
+											errorTrap = system(job); //the job gets launched here
 													if (errorTrap < 0)
 													{
 														//an error has been sent
