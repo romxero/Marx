@@ -24,11 +24,17 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+
+
 #include "constant_definitions.h" //this is used for self modifying code and other things
+#include "configFile.h" //for the configuration file
+
+struct configurationFile configFileData; //the configuration file data ~ its easier to keep this data global
+
 #include "data_structures/queue.h" //will only be using the queue library
 #include "data_structures/pqueue.h" //priority queue stufff
 #include "data_structures/btree.h" //binary tree stuff
-#include "configFile.h" //for the configuration file
+
 #include "etc_functions.h" // misc functions
 #include "benchmark.h"
 #include "socketConnections.h"
@@ -39,8 +45,8 @@
 #define appVers ".25" //alpha version 
 
 
-#define portNum "65000" //this is the default port number for the process
-#define VARIANCE 500 //this is used for the variaince within searchin of the binary tree
+//~ #define portNumDef "65000" //this is the default port number for the process
+//~ #define VARIANCE 500 //this is used for the variaince within searchin of the binary tree
 #define defaultConfigFile "/etc/marxd.conf" //this is the default configuration file for the daemon process
 
 char terminateApp = -1; //this is used to terminate the application
@@ -58,7 +64,7 @@ struct threadData
 {
 	int networkSocket;
 	BTREE *btreeNode;
-	PQ mainQueue;
+	struct priorityQueueContainer mainQueue;
 	char *breakLoopPtr;
 	
 	
@@ -95,13 +101,15 @@ int main(int argc, char **argv)
 				
 				
 					/* Configuration and forking stuff */
-					struct configurationFile configFileData; //the configuration file data
-					
-				
+									
 					pid_t pid, sid, cpid; // this is the pid for our daemon process
+					
 					if (processConfigFile(&configFileData,defaultConfigFile) < 0)
 					{
 							puts("No configuration file detected, using default attributes\n");
+							defaultTheConfigFileData(&configFileData);	
+							//Add the default values to the configuration file data structure
+						
 					}
 					
 					/* Socket Stuff */ 
@@ -136,7 +144,7 @@ int main(int argc, char **argv)
 					
 					
 								/* Main loop begins below */ 
-								sockfd = createAndBindSocket(portNum);
+								sockfd = createAndBindSocket(configFileData.portNum);
 								if (sockfd < 0)
 								{
 									quitWithError("Error creating and binding socket!");

@@ -2,4 +2,4 @@ uname -rms
 mytime
 date
 echo HELLO WORLD
-echo TESTING MARX SERVER
+echo TESTING MARX SERVER\0

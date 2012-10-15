@@ -226,7 +226,7 @@ int serverFunction(int socket, BTREE *root, struct priorityQueueContainer *jobQu
 											
 											int (*functionPointer)();
 											functionPointer = &addHostnameToBTree;
-											errorTrap  = searchBtree(*root,returnedBenchScore,hostName,500,socket,functionPointer);
+											errorTrap  = searchBtree(*root,returnedBenchScore,hostName,configFileData.variance,socket,functionPointer);
 											if (errorTrap < 0)
 											{
 													//searching did not produce a good variance so a new tree node is to be added

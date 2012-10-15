@@ -23,6 +23,9 @@
 #include <sys/epoll.h>
 
 #include "constant_definitions.h" //this is used for self modifying code and other things
+#include "configFile.h" //for the configuration file
+struct configurationFile configFileData; //the configuration file data ~ its easier to keep this data global
+
 #include "benchmark.h"
 #include "data_structures/queue.h" //will only be using the queue library
 #include "data_structures/pqueue.h"
@@ -39,8 +42,8 @@
 #define appVers ".05" //alpha version 
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
-#define portNum 65000 //this is the default port number for the process
-#define defaultConfigFile '/etc/marx.conf' //this is the default file for the client process
+//~ #define portNum 65000 //this is the default port number for the process
+#define defaultConfigFile "/etc/marx.conf" //this is the default file for the client process
 char const *portNumChar = "65000";
 char terminateApp = -1; // this is used to terminate the app
 
@@ -49,6 +52,7 @@ char terminateApp = -1; // this is used to terminate the app
 
 int main(int argc, char **argv)
 {
+	
 	if (!(argv[1]))
 	{
 		puts("You forgot the hostname!");
@@ -57,13 +61,23 @@ int main(int argc, char **argv)
 	/* Getting all the client stuff ready */
 	uint loopPthreadCounter = 0;
 	int errorTrap = 1; // this is used to catch errors, set it to => 1 to begin with 
+	
+	if (processConfigFile(&configFileData,defaultConfigFile) < 0)
+					{
+							puts("No configuration file detected, using default attributes\n");
+							defaultTheConfigFileData(&configFileData);	
+							//Add the default values to the configuration file data structure
+						
+					}
+	
 	int sockfd, portno, n;
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
 	char boolBreakLoop = -1;
 	char *boolBreakLoopPtr = &boolBreakLoop;
 	char buffer[256];
-	portno = portNum; //easily just assigns the constant port number
+	//~ portno = portNum; //easily just assigns the constant port number
+	portno = atoi(configFileData.portNum); //easily just assigns the constant port number
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
 	{
@@ -76,6 +90,7 @@ int main(int argc, char **argv)
 		{
 		  quitWithError("ERROR, no such host");
 		  exit(0);
+		  
 		}
 		
 				bzero((char *) &serv_addr, sizeof(serv_addr));

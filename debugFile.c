@@ -40,7 +40,7 @@
 #define maxConnections 1024 // this will be used for the maximum connections to this server
 #define maxThreads 64 //might increase depending on the processor
 #define portNum 65000 //this is the default port number for the process
-#define defaultConfigFile '/etc/marx.conf' //this is the default file for the client process
+#define defaultConfigFile "/etc/marx.conf" //this is the default file for the client process
 char const *portNumChar = "65000";
 
 
