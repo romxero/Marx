@@ -1,5 +1,5 @@
 uname -rms
-mytime
+date +"%r"
 date
 echo HELLO WORLD
 echo TESTING MARX SERVER

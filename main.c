@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 					int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff	
 					static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
 					
-					QUEUE *priorityQueue = NULL; //this is the main priority queue 
+					//~ QUEUE *priorityQueue = NULL; //this is the main priority queue 
 					//~ initQueue(&jobQueue,1);
 					//~ 
 					//~ PQ jobQueue; //this is the priority queue
@@ -208,6 +208,7 @@ int main(int argc, char **argv)
 												
 												traverseBTree(rootNode,POST_ORDER, jobQueue.head->queueElement, functionPointer);
 												pDequeue(&jobQueue); //removes the top element in priority queue
+												heartBeatProcess(&jobQueue);
 											}
 												
 												

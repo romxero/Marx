@@ -44,7 +44,7 @@ void initQueue(QUEUE *root, char priorityNum, int directivePassed)
 
 QLINK returnQueueElement()
 {
-	return calloc(1, sizeof(QLINK));
+	return calloc(1, sizeof(QELEMENT));
 }
 
 void enqueue(QUEUE *root, QDATA var)

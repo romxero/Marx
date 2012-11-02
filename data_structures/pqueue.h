@@ -1,19 +1,21 @@
+
+
 //this is for a priority queue
 typedef QUEUE *PQUEUE;
 
-struct priQueue
-{
-	int count; //forgot why I made this an integer type 
-	PQUEUE pQueue;
-	
-};
 
+char const NO_PRIORITY = 0x00;
+char const LOW_PRIORITY = 0x01;
+char const MED_PRIORITY = 0x02;
+char const HIGH_PRIORITY = 0x03;
 
 struct priorityQueue
 {
 			QUEUE  *queueElement; //the queue element
-			
+			int heartBeats; //this is used check if the 
 			struct priorityQueue *next; //this is the next element in the queue...
+			char currentPriority;
+			
 }; //this is the priority queue strucuture
 
 typedef struct priorityQueue pre_pQueue;
@@ -34,11 +36,15 @@ pQueue returnPQueueMem()
 	
 }
 
+void heartBeatProcess(struct priorityQueueContainer *root);
+void heartBeat(struct priorityQueueContainer *root);
+
 void initializePQueue(struct priorityQueueContainer *root)
 {
 	root->head = NULL;
 	root->tail = NULL;
 	root->count = 0;
+	//~ root
 	
 	
 }
@@ -48,6 +54,8 @@ int pEnqueue(struct priorityQueueContainer *root, QUEUE *passedQueue)
 {
 		pQueue tempNode = returnPQueueMem();
 		tempNode->queueElement = passedQueue;
+		tempNode->currentPriority = tempNode->queueElement->priority;
+		tempNode->heartBeats = 0; //this is used to tell how long a priority queue should be in there before its placed on top
 		tempNode->next = NULL;
 		
 
@@ -66,7 +74,8 @@ int pEnqueue(struct priorityQueueContainer *root, QUEUE *passedQueue)
 			
 			
 			
-			if( tempNode->queueElement->priority  >= rootNode->queueElement->priority )
+			//~ if( tempNode->queueElement->priority  >= rootNode->queueElement->priority )
+			if( tempNode->currentPriority  >= rootNode->currentPriority )
 				{
 					tempNode->next = rootNode;
 					rootNode = tempNode;
@@ -82,7 +91,7 @@ int pEnqueue(struct priorityQueueContainer *root, QUEUE *passedQueue)
 				}
 			else
 				{
-					for(; rootNode->queueElement->priority > tempNode->queueElement->priority; rootNode = rootNode->next)
+					for(; rootNode->currentPriority > tempNode->currentPriority; rootNode = rootNode->next)
 					{
 						if (rootNode->next->queueElement->priority <= tempNode->queueElement->priority)
 						{
@@ -113,6 +122,23 @@ int pEnqueue(struct priorityQueueContainer *root, QUEUE *passedQueue)
 		}
 
 		root->count++;
+		
+		
+		//Below is used to increment the heartbeats
+		tempNode = root->head;
+		
+		
+				while(tempNode != NULL)
+				{
+					tempNode->heartBeats++; //increase heartbeats for all of the nodes.
+					
+					tempNode = tempNode->next;
+				}
+				
+				tempNode = NULL;
+			
+		
+		
 		return 1; //good 	
 }
 
@@ -162,8 +188,116 @@ PQUEUE returnPQueueElement()
 	
 }
 	
+void heartBeatProcess(struct priorityQueueContainer *root)
+{
+		pQueue tempNode = root->head;
+		pQueue rootNodeCopy = root->head;
+		pQueue rootNode = root->head;
+		
+		
+		//~ while(tempNode != NULL)
+		//~ {
+			//~ tempNode->heartBeats++; //increase heartbeats for all of the nodes.
+			//~ 
+			//~ tempNode = tempNode->next;
+		//~ }
+		//~ 
+	//~ 
+		int i = 0;
+		
+		for (; i < root->count; i++)
+		{
+				rootNodeCopy = root->head;
+				rootNode = root->head;
+				tempNode = NULL;
+				
+						while(rootNodeCopy != NULL)
+						{
+							if (rootNodeCopy->next != NULL)
+							{
+									if (rootNodeCopy->next->heartBeats >= 5 )
+									{
+										
+										tempNode = rootNodeCopy->next;
+										tempNode->currentPriority = 5;
+										tempNode->heartBeats = 0; // reset the heart beats
+										
+										rootNodeCopy->next = rootNodeCopy->next->next;
+									
+										if( tempNode->currentPriority  >= rootNode->currentPriority )
+											{
+												tempNode->next = rootNode;
+												rootNode = tempNode;
+												root->head = rootNode;
+												while (rootNode->next != NULL)
+												{
+													rootNode = rootNode->next;
+												}
+												
+												root->tail = rootNode;
+											
+												
+											}
+										else
+											{
+												
+											for(; rootNode->currentPriority > tempNode->currentPriority; rootNode = rootNode->next)
+											{
+												if (rootNode->next->queueElement->priority <= tempNode->queueElement->priority)
+												{
+													tempNode->next = rootNode->next;
+													rootNode->next = tempNode;
+													break; //break out of the loop for safeness
+												}
+												
+												
+											}
+											
+												if (rootNode->next == NULL)
+												{
+													tempNode->next = rootNode->next;
+													rootNode->next = tempNode;
+													
+												}
+												//this right here goes to the end of the linked list and adds it to tail
+												while (rootNode->next != NULL)
+												{
+													rootNode = rootNode->next;
+												}
+												
+												root->tail = rootNode;
+									
+											}
+										//
+										break;
+										
+									}
+							}
+							
+							rootNodeCopy = rootNodeCopy->next;
+						}
+			
+		}
+		
+		
+		
+		
+}
 	
 	
+void heartBeat(struct priorityQueueContainer *root)
+{
+	pQueue tempNode = root->head;
+		while(tempNode != NULL)
+		{
+			tempNode->heartBeats++; //increase heartbeats for all of the nodes.
+			
+			tempNode = tempNode->next;
+		}
+		
+	
+}
+
 	//############################################################################################
 
 

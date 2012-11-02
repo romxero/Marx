@@ -134,35 +134,14 @@ char* recieveMessage(int sockfd)
 	return message;
 }
 /* These are wrapper functions for the mundane tasks */ 
-int reciveJobs()
-{
-	
-}
-int sendJobs()
-{
-	
-}
-int sendQueueProcess()
-{
-	
-}
 
-int recieveQueueProcess()
-{
-	
-}
-
-int recieveAddPeer()
-{
-	
-	
-}
 
 int sendAddPeer()
 {
 	
 }
 /* End of wrapper functions for mundane tasks */
+//REMEMBER TO ADD DEFAULTS TO switch statements!!
 
 int serverFunction(int socket, BTREE *root, struct priorityQueueContainer *jobQueue, char *loopVar)
 {
@@ -374,6 +353,7 @@ int serverFunction(int socket, BTREE *root, struct priorityQueueContainer *jobQu
 
 int peerFunction(int socket, char *loopVar)
 {
+	
 							
 								//this function is for peers
 								int errorTrap = 1;
@@ -457,6 +437,29 @@ int peerFunction(int socket, char *loopVar)
 									case KILL_PEER:
 									{
 										*loopVar = 1;	
+										break;
+										
+									}
+									case SEND_CPULOAD:
+									{
+										//this is used to send the load value of the cpu 
+										
+										double load[3];
+										errorTrap = getloadavg(load, 3);
+										if (errorTrap == -1)
+										{
+											//something bad happened here!!
+											return -1;
+										}
+										//double avg = (load[0] + load[1] + load[2]) / 3;
+										float loadAvg = ((float) load[0] + (float) load[1] + (float) load[2]) / 3;
+										errorTrap = send(socket,&loadAvg,sizeof(float),0);
+										if (errorTrap < 0)
+											{
+												return -1;
+												//an error happened
+											}
+										
 										break;
 										
 									}
