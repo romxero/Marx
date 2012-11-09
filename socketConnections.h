@@ -341,6 +341,11 @@ int serverFunction(int socket, BTREE *root, struct priorityQueueContainer *jobQu
 										*loopVar = 1;
 										break;
 									}
+									default:
+									{
+										return -1; //this means garbage was recieved
+											break;
+									} 
 									
 									
 								}
@@ -463,6 +468,11 @@ int peerFunction(int socket, char *loopVar)
 										break;
 										
 									}
+									default:
+									{
+										return -1; //this means garbage was recieved
+											break;
+									} 
 								}
 								
 								

@@ -8,6 +8,7 @@ struct configurationFile
         char portNum[16];
         int variance;
         int directive;
+        int min_peers;
         char directory[32];
         
 }; //this is used for the configuration file
@@ -55,7 +56,13 @@ int processConfigFile(struct configurationFile *config, char const *filePath)
                         //~ strcpy(config->variance,str);
                         config->variance = atoi(str);
 						}
-                        
+						
+                        if (config_lookup_string(&configFile, "min_peers", &str))
+                        {
+                        ////~ strcpy(config->variance,str);
+                        config->min_peers = atoi(str);
+						}
+                        //~ 
                         
                 
                 
@@ -71,13 +78,12 @@ void defaultTheConfigFileData(struct configurationFile *config)
 {
 	int stringLength = 0;
 	stringLength = strlen("65000");
-	
 	strcpy(config->portNum,"65000");
 	config->portNum[stringLength] = '\0';
-	config->variance = 500;
+	config->variance = 5;
 	config->directive = ROUND_ROBIN;
 	stringLength = strlen("/home/cluster");
 	strcpy(config->directory,"/home/cluster");
-	config->directory[stringLength] = '\0';
-	
+	config->directory[stringLength] = '\0'; //terminate the string
+	config->min_peers = 3; //minimum peers allowed to continue 
 }

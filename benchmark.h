@@ -30,7 +30,7 @@ int benchMark()
 	
 	
 	
-	return 1000;
+	return (int) cpu_time_used;
 	
 	
 }
@@ -55,14 +55,10 @@ void setChessBoard(int N, char chessBoard[N][N])
 
 int queenP(int N, char chessBoard[N][N], int count, int *externalCounter)
 {
-	if (*externalCounter == 5)
-	{
-		return 1;
-	}
-	else if (count == N)
+	 if (count == N)
 	{
 		++*externalCounter;
-		puts("Found A Solution!!\n");
+		
 		
 	}
 	
