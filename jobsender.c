@@ -1,53 +1,8 @@
-/*Created by Randy White
- * CIS 049
- * 8/25/2012
- * Marx Client
-*/
+#include "libmarx.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h> //make sure to build with param -lpthread
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>              /* Obtain O_* constant definitions */
-#include <errno.h>
-#include <syslog.h>
-#include <string.h> //make sure the string library is here
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <linux/futex.h>
-#include <sys/time.h>
-#include <netdb.h> //this has some structures to pass a host to this to the client program.
-#include <sys/epoll.h>
-#include "constant_definitions.h" //this is used for self modifying code and other things
-#include "configFile.h" //for the configuration file
+//~ char const *portNumChar = "65000";
 
-struct configurationFile configFileData; //the configuration file data ~ its easier to keep this data global
-
-
-#include "benchmark.h"
-#include "data_structures/queue.h" //will only be using the queue library
-#include "data_structures/pqueue.h" //will only be using the queue library
-#include "data_structures/btree.h"
-
-
-#include "etc_functions.h" // this is for the binary ~ non cascade!! 
-
-#include "socketConnections.h"
-
-/*Define Constant Macros */
-
-#define appName "Marx Peer" //application name
-#define appVers ".05" //alpha version 
-#define maxConnections 1024 // this will be used for the maximum connections to this server
-#define maxThreads 64 //might increase depending on the processor
-#define portNum 65000 //this is the default port number for the process
-#define defaultConfigFile "/etc/marx.conf" //this is the default file for the client process
-char const *portNumChar = "65000";
-
-
+												
 
 
 
@@ -63,6 +18,14 @@ int main(int argc, char **argv)
 		puts("You forgot the file!");
 		return -1;
 	}
+	
+												if (processConfigFile(&configFileData,defaultConfigFile) < 0)
+												{
+														puts("No configuration file detected, using default attributes\n");
+														defaultTheConfigFileData(&configFileData);	
+														//Add the default values to the configuration file data structure
+													
+												}
 	
 	FILE *fp = NULL;
 	char *line = NULL;
@@ -121,7 +84,7 @@ int main(int argc, char **argv)
 	char boolBreakLoop = -1;
 	char *boolBreakLoopPtr = &boolBreakLoop;
 	char buffer[256];
-	portno = portNum; //easily just assigns the constant port number
+	portno = atoi(configFileData.portNum); //easily just assigns the constant port number
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
 	{

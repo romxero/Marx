@@ -1,92 +1,28 @@
-/*Created by Randy White
- * CIS 049
- * 8/25/2012
- * Marx Server
-*/
+#include "libmarx.h"
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h> //make sure to build with param -lpthread
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>              /* Obtain O_* constant definitions */
-#include <errno.h>
-#include <syslog.h>
-#include <string.h> //make sure the string library is here
-#include <signal.h>
-
-
-#include <sys/types.h> 
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-
-
-
-#include "constant_definitions.h" //this is used for self modifying code and other things
-#include "configFile.h" //for the configuration file
-
-struct configurationFile configFileData; //the configuration file data ~ its easier to keep this data global
-
-#include "data_structures/queue.h" //will only be using the queue library
-#include "data_structures/pqueue.h" //priority queue stufff
-#include "data_structures/btree.h" //binary tree stuff
-
-#include "etc_functions.h" // misc functions
-#include "benchmark.h"
-#include "socketConnections.h"
-
-/*Define Constant Macros */
-
-#define appName "Marx Server" //application name
-#define appVers ".25" //alpha version 
-
-
-//~ #define portNumDef "65000" //this is the default port number for the process
-//~ #define VARIANCE 500 //this is used for the variaince within searchin of the binary tree
-#define defaultConfigFile "/etc/marxd.conf" //this is the default configuration file for the daemon process
-
-char terminateApp = -1; //this is used to terminate the application
-char *terminateAppPtr = &terminateApp; //this is a pointer used to terminate the application
-
-
-void cleanUp()
-{
-	puts("Goodbye!, Process has been killed");
-	terminateApp = 1; //this is just used to break out of the main loop
-	
-}
-
-struct threadData
-{
-	int networkSocket;
-	BTREE *btreeNode;
-	struct priorityQueueContainer mainQueue;
-	char *breakLoopPtr;
-	
-	
-};
-
-
-void *threadWrapper(void *threadParameters)
-{
-	struct threadData *DataForFunction;
-	DataForFunction = (struct threadData *) threadParameters;
-	
+//~ void *threadWrapper(void *threadParameters)
+//~ {
+	//~ struct threadData *DataForFunction;
+	//~ DataForFunction = (struct threadData *) threadParameters;
+	//~ 
 	//~ serverFunction(DataForFunction->networkSocket,DataForFunction->btreeNode,DataForFunction->mainQueue,DataForFunction->breakLoopPtr); //main server function
-	pthread_exit(NULL);
-	
-}
+	//~ pthread_exit(NULL);
+	//~ 
+//~ }
 
-typedef unsigned int uint; //use this for an unsigned interger
+
 
 //maybe I should take out the pointer of pointer parmeter in main function
 
 int main(int argc, char **argv)
 {
+				
+				if (argc == 1)
+					{
+						
+						quitWithError(appUsageString);
+					}
 				
 				/* Multi-threading stuff */
 				int numCPU = sysconf( _SC_NPROCESSORS_ONLN );  
@@ -96,7 +32,7 @@ int main(int argc, char **argv)
 				pthread_mutex_t pqueueMutex, peerMutex, killMutex; //three mutexes for multithreading operarions
 				uint threadCounter = 0;
 				
-				struct threadData serverDataForPthreads[numCPU]; //this is used as a wrapper data structure for our message passing functino in a multithreading environment
+				//~ struct threadData serverDataForPthreads[numCPU]; //this is used as a wrapper data structure for our message passing functino in a multithreading environment
 				
 				
 				
@@ -104,13 +40,7 @@ int main(int argc, char **argv)
 									
 					pid_t pid, sid, cpid; // this is the pid for our daemon process
 					
-					if (processConfigFile(&configFileData,defaultConfigFile) < 0)
-					{
-							puts("No configuration file detected, using default attributes\n");
-							defaultTheConfigFileData(&configFileData);	
-							//Add the default values to the configuration file data structure
-						
-					}
+
 					
 					/* Socket Stuff */ 
 					int sockfd, newsockfd, portno; //for socket return values
@@ -129,20 +59,109 @@ int main(int argc, char **argv)
 					
 					
 					/* Main event loop stuff */
-					int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff	
-					static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
 					
-					//~ QUEUE *priorityQueue = NULL; //this is the main priority queue 
-					//~ initQueue(&jobQueue,1);
-					//~ 
-					//~ PQ jobQueue; //this is the priority queue
-					//~ initPqueue(&jobQueue); //initialize the queue
-					//~ 
-					struct priorityQueueContainer jobQueue;
-					initializePQueue(&jobQueue);
 					int errorTrap; //used to find errors in the code
 					
+					if(strcmp(argv[1],"-p") == 0)
+					//~ if(argv[1])
+					{
+						if (!(argv[2]))
+						{
+							quitWithError("You forgot the hostname!");
+		
+							
+						}
+						else 
+						{
+							
+												if (processConfigFile(&configFileData,defaultConfigFile) < 0)
+												{
+														puts("No configuration file detected, using default attributes\n");
+														defaultTheConfigFileData(&configFileData);	
+														//Add the default values to the configuration file data structure
+													
+												}
+							
+							struct hostent *server; //to signify the server element
+							portno = atoi(configFileData.portNum); //easily just assigns the constant port number
+	
+								sockfd = socket(AF_INET, SOCK_STREAM, 0);
+								//~ sockfd = createPeerSocket();
+								if (sockfd < 0)
+								{
+								quitWithError("ERROR opening socket");
+								}
+								
+								
+									server = gethostbyname(argv[2]); //this function assigns the hostname to the server pointer
+									if (server == NULL)
+									{
+									  quitWithError("ERROR, no such host");
+
+									  
+									}
+									
+										bzero((char *) &serv_addr, sizeof(serv_addr));
+				serv_addr.sin_family = AF_INET;
+				bcopy((char *)server->h_addr,(char *)&serv_addr.sin_addr.s_addr,server->h_length);
+				serv_addr.sin_port = htons(portno);
+	
+				if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) //this needed to be casted right here
+				{
+					quitWithError("ERROR connecting");
+				}
+				
+					//~ printf("Please enter the message: ");
+				  int sendVar = ZERO_OUT_VALUE;
+				  int *sendVarPtr = &sendVar;
+				  
+				  int recieveVar = ZERO_OUT_VALUE;
+				  int *recieveVarPtr = &recieveVar;
+
+				  sendVar = NEW_PEER;
+				  send(sockfd,sendVarPtr,sizeof(int),0);
+				  
+				  
+				while(terminateApp < 0)
+				{  
 					
+					
+						peerFunction(sockfd,terminateAppPtr);
+				}
+										
+										close(sockfd); //close the socket
+										shutdown(sockfd,SHUT_WR); 
+							
+						}
+					
+						//this is where the peer stuff goes
+						
+					}
+					else if(strcmp(argv[1],"-s") == 0)
+					{
+						
+											if (processConfigFile(&configFileData,defaultConfigFile) < 0)
+											{
+													puts("No configuration file detected, using default attributes\n");
+													defaultTheConfigFileData(&configFileData);	
+													//Add the default values to the configuration file data structure
+												
+											}
+					
+							int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff	
+							static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
+							
+							//~ QUEUE *priorityQueue = NULL; //this is the main priority queue 
+							//~ initQueue(&jobQueue,1);
+							//~ 
+							//~ PQ jobQueue; //this is the priority queue
+							//~ initPqueue(&jobQueue); //initialize the queue
+							//~ 
+							struct priorityQueueContainer jobQueue;
+							initializePQueue(&jobQueue);
+					
+								//this is for the server process
+								
 								/* Main loop begins below */ 
 								sockfd = createAndBindSocket(configFileData.portNum);
 								if (sockfd < 0)
@@ -182,7 +201,7 @@ int main(int argc, char **argv)
 									if (newsockfd != -1)
 									{
 										
-										serverDataForPthreads[threadCounter].networkSocket = newsockfd;
+										//~ serverDataForPthreads[threadCounter].networkSocket = newsockfd;
 										
 										errorTrap = serverFunction(newsockfd,&rootNode,&jobQueue,terminateAppPtr); //main server function
 											if (errorTrap < 0)
@@ -202,6 +221,7 @@ int main(int argc, char **argv)
 												puts("There are no peers connected to the server\n");
 												break;
 											}
+											
 											else
 											{
 												functionPointer = &launchJobs; //remove all elements
@@ -226,16 +246,23 @@ int main(int argc, char **argv)
 						
 							
 							}
-										
-										
-						
-					/* This is the clean up section outside of the main loop */
-					close(sockfd); //close the socket
-					shutdown(sockfd,SHUT_WR); 
-					//~ free(hostName);
-					functionPointer = &freeMemInBTree; //remove all elements
+									/* This is the clean up section outside of the main loop */
+									close(sockfd); //close the socket
+									shutdown(sockfd,SHUT_WR); 
+									//~ free(hostName);
+									functionPointer = &freeMemInBTree; //remove all elements
 			
-					traverseBTree(rootNode,POST_ORDER, NULL, functionPointer);
+									traverseBTree(rootNode,POST_ORDER, NULL, functionPointer);
+										
+					}
+					else
+					{
+						quitWithError(appUsageString);
+						
+					}					
+						
+			
+			
 					
 						return 0;
 						
