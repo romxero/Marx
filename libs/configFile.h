@@ -10,6 +10,7 @@ struct configurationFile
         int directive;
         int min_peers;
         char directory[32];
+        int benchScore;
         
 }; //this is used for the configuration file
 

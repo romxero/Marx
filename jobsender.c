@@ -8,7 +8,16 @@
 
 int main(int argc, char **argv)
 {
-	if (!(argv[1]))
+	if (strcmp(argv[1], "-l") == 0)
+	{
+		
+		
+		
+	}
+	
+	if (strcmp(argv[1], "-j") == 0)
+	{
+	if (!(argv[3]))
 	{
 		puts("You forgot the hostname!");
 		return -1;
@@ -17,7 +26,12 @@ int main(int argc, char **argv)
 	{
 		puts("You forgot the file!");
 		return -1;
+	}	
+		
+		
 	}
+	
+	
 	
 												if (processConfigFile(&configFileData,defaultConfigFile) < 0)
 												{
@@ -92,7 +106,7 @@ int main(int argc, char **argv)
 	}
 	
 	
-		server = gethostbyname(argv[1]); //this function assigns the hostname to the server pointer
+		server = gethostbyname(argv[3]); //this function assigns the hostname to the server pointer
 		if (server == NULL)
 		{
 		  quitWithError("ERROR, no such host");
