@@ -1,7 +1,8 @@
-typedef unsigned char *QDATA;
+typedef unsigned char *QDATA; //queue data
 
 struct qLinkedList
 {
+	//linked list of queue structure
 	QDATA value;
 	struct qLinkedList *next;
 };
@@ -12,6 +13,7 @@ typedef QELEMENT *QLINK;
 
 struct queue
 {
+	//the queue container
 	QLINK head, tail;
 	int numOfElements;
 	int directive; //this will be used for directives of the queue
@@ -23,6 +25,7 @@ typedef struct queue QUEUE;
 
 int isQueueEmpty(QUEUE *root)
 {
+	//checks to see if the queue is empty
 	if (root->head == NULL)
 	{
 		return 1;
@@ -35,6 +38,7 @@ int isQueueEmpty(QUEUE *root)
 
 void initQueue(QUEUE *root, char priorityNum, int directivePassed)
 {
+	//initializes the queue
 	root->head = NULL;
 	root->tail = NULL;
 	root->numOfElements = 0;
@@ -44,11 +48,13 @@ void initQueue(QUEUE *root, char priorityNum, int directivePassed)
 
 QLINK returnQueueElement()
 {
+	//returns a queue element
 	return calloc(1, sizeof(QELEMENT));
 }
 
 void enqueue(QUEUE *root, QDATA var)
 {
+	//enqueue
 	QLINK temp = returnQueueElement();
 	temp->value = var; 
 	temp->next = NULL;
@@ -66,7 +72,7 @@ void enqueue(QUEUE *root, QDATA var)
 
 int dequeue(QUEUE *root)
 {
-	
+	//dequeue
 	if (isQueueEmpty(root) > 0)
 	{
 		
@@ -90,6 +96,7 @@ int dequeue(QUEUE *root)
 
 char* peek(QUEUE *root)
 {
+	//peek at the top of the queue
 	if (root->head != NULL)
 	{
 	return root->head->value;

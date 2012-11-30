@@ -455,7 +455,8 @@ int peerFunction(int socket, char *loopVar)
 									}
 									case SEND_BENCHSCORE:
 									{
-										sendVar = benchMark();
+										//~ sendVar = benchMark(); //deprecated
+										sendVar = configFileData.benchscore; //get benchscore from config file
 										errorTrap = send(socket,sendVarPtr,sizeof(int),0);
 										if (errorTrap < 0)
 											{

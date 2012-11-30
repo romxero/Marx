@@ -1,5 +1,6 @@
 //benchmarkData
  #include <time.h>
+/* Function prototypes */
 
 int queenP(int N, char chessBoard[N][N], int count, int *externalCounter);
 void displayChessBoard(int N, char chessBoard[N][N]);
@@ -57,7 +58,7 @@ int queenP(int N, char chessBoard[N][N], int count, int *externalCounter)
 {
 	 if (count == N)
 	{
-		++*externalCounter;
+		++*externalCounter; //increment the external counter
 		
 		
 	}
@@ -89,7 +90,7 @@ int queenP(int N, char chessBoard[N][N], int count, int *externalCounter)
 						//~ sleep(2);
 					//	break;
 						 
-						 queenP(N, duplicateBoard,count,externalCounter);
+						 queenP(N, duplicateBoard,count,externalCounter); //recursively calls itself
 						 
 					}
 				
@@ -107,7 +108,7 @@ int queenP(int N, char chessBoard[N][N], int count, int *externalCounter)
 void displayChessBoard(int N, char chessBoard[N][N])
 {
 
-		
+		//this function just displays the chess board (unused in regular benchmark)
 int i, k; //counter for the  FSM 
  
  i = k = 0;
@@ -133,7 +134,7 @@ for (i = 0; i < N; ++i)
 
 void copyBoard(int N, char chessBoard[N][N],char duplicateBoard[N][N])
 {
-	
+	//this function duplicates a board
 	int i, k; //counter for the  FSM 
  
  i = k = 0;
@@ -142,7 +143,7 @@ for (i = 0; i < N; ++i)
 {
 	for (k = 0; k < N; ++k)
 	{
-		duplicateBoard[i][k] = chessBoard[i][k];
+		duplicateBoard[i][k] = chessBoard[i][k]; //duplication
 
 	}
 
@@ -154,7 +155,7 @@ for (i = 0; i < N; ++i)
 
 void splayBoard(int i,int k, int N, char chessBoard[N][N])
 {
-		
+		//this function modifies the board depending on placements of the queen
 		int m, n, o, p;
 		m = n = o = p = 0;
 		for (n = 0; n < N; ++n)

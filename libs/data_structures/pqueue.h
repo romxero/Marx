@@ -3,7 +3,7 @@
 //this is for a priority queue
 typedef QUEUE *PQUEUE;
 
-
+//the priority constants
 char const NO_PRIORITY = 0x00;
 char const LOW_PRIORITY = 0x01;
 char const MED_PRIORITY = 0x02;
@@ -41,6 +41,7 @@ void heartBeat(struct priorityQueueContainer *root);
 
 void initializePQueue(struct priorityQueueContainer *root)
 {
+	//initialize the pqueue
 	root->head = NULL;
 	root->tail = NULL;
 	root->count = 0;
@@ -52,6 +53,8 @@ void initializePQueue(struct priorityQueueContainer *root)
 
 int pEnqueue(struct priorityQueueContainer *root, QUEUE *passedQueue)
 {
+		//enqueues an element with priorities
+		
 		pQueue tempNode = returnPQueueMem();
 		tempNode->queueElement = passedQueue;
 		tempNode->currentPriority = tempNode->queueElement->priority;
@@ -144,6 +147,7 @@ int pEnqueue(struct priorityQueueContainer *root, QUEUE *passedQueue)
 
 int isPQueueEmpty(struct priorityQueueContainer *root)
 {
+	//checks to see if the queue is empty
 	if (root->head == NULL)
 	{
 		return 1;
@@ -157,6 +161,7 @@ int isPQueueEmpty(struct priorityQueueContainer *root)
 	
 int pDequeue(struct priorityQueueContainer *root)
 {
+	//dequeue an element
 	if (isPQueueEmpty(root) > 0)
 	{
 		
@@ -190,6 +195,7 @@ PQUEUE returnPQueueElement()
 	
 void heartBeatProcess(struct priorityQueueContainer *root)
 {
+	//re-queues elements depending on the heart beats
 		pQueue tempNode = root->head;
 		pQueue rootNodeCopy = root->head;
 		pQueue rootNode = root->head;
@@ -287,6 +293,7 @@ void heartBeatProcess(struct priorityQueueContainer *root)
 	
 void heartBeat(struct priorityQueueContainer *root)
 {
+	//this increases the heartbeats
 	pQueue tempNode = root->head;
 		while(tempNode != NULL)
 		{

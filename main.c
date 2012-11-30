@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 				if (argc == 1)
 					{
 						
-						quitWithError(appUsageString);
+						quitWithError(appUsageString); //shows application usage
 					}
 				
 				/* Multi-threading stuff */
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 				
 					/* Configuration and forking stuff */
 									
-					pid_t pid, sid, cpid; // this is the pid for our daemon process
+					
 					
 
 					
@@ -58,11 +58,12 @@ int main(int argc, char **argv)
 					
 					
 					
+					
 					/* Main event loop stuff */
 					
 					int errorTrap; //used to find errors in the code
 					
-					if(strcmp(argv[1],"-p") == 0)
+					if(strcmp(argv[1],"-p") == 0) //peer condition
 					//~ if(argv[1])
 					{
 						if (!(argv[2]))
@@ -75,12 +76,29 @@ int main(int argc, char **argv)
 						{
 							
 												if (processConfigFile(&configFileData,defaultConfigFile) < 0)
+												//~ if (processConfigFile(&configFileData,"marxd.conf") < 0)
 												{
 														puts("No configuration file detected, using default attributes\n");
 														defaultTheConfigFileData(&configFileData);	
 														//Add the default values to the configuration file data structure
 													
 												}
+							if(configFileData.benchscore == -1)
+							{
+								puts("Uh-oh no saved benchscore, running benchmark now.. this may take awhile..");
+								
+								configFileData.benchscore = benchMark(); //run the benchmark function
+								
+								if (writeBenchScoreToConfig(&configFileData,defaultConfigFile) < 0 )
+								{
+									puts("An error occured writing to the config file! The file might not exist!");
+									
+								}
+								
+							}
+							
+							startDaemonMode(); //start as a daemon now
+							
 							
 							struct hostent *server; //to signify the server element
 							portno = atoi(configFileData.portNum); //easily just assigns the constant port number
@@ -147,7 +165,7 @@ int main(int argc, char **argv)
 													//Add the default values to the configuration file data structure
 												
 											}
-					
+							startDaemonMode(); //start as a daemon now
 							int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff	
 							static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
 							
@@ -257,7 +275,7 @@ int main(int argc, char **argv)
 					}
 					else
 					{
-						quitWithError(appUsageString);
+						quitWithError(appUsageString); //shows application usage
 						
 					}					
 						

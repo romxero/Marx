@@ -19,18 +19,20 @@ struct node
 
 };
 
-typedef struct node NODE; 
-typedef NODE *BTREE;
+typedef struct node NODE; //typedef for the node
+typedef NODE *BTREE; //typedef for node pointer
 // Take this or leave this
 
 
 BTREE newNode()
 {
+	//allocates new node data
 	return calloc(1, sizeof(NODE));
 }
 
 void bTreeInit(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList, int socket)
 {
+	//initializes the binary tree
 			//~ root = newNode();
 			root->benchscore = passedValue;
 			root->left = NULL;
@@ -44,13 +46,14 @@ void bTreeInit(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList, int
 
 void releaseBTreeData(BTREE root)
 {	
-	free(root->serverList);
+	free(root->serverList); //release 
 	free(root); //free
 }
 
 int freeMemInBTree(BTREE root)
 {
-	removeAllNodes(root->serverList);
+	//this function is used to free the memory in the binary tree
+	removeAllNodes(root->serverList); //removes servers in linked list
 	
 	free(root);
 }
@@ -58,7 +61,7 @@ int freeMemInBTree(BTREE root)
 
 void traverseBTree(BTREE root, const char DIRECTIVE, PQUEUE jobs, int (*functionPointer)(BTREE root, PQUEUE jobs))
 {
-		
+		//this function traverses a binary tree in three different orders and uses a function pointer to do processes on nodes
 		if (root != NULL)
 		{
 			if (DIRECTIVE == INORDER)
@@ -104,7 +107,7 @@ void traverseBTree(BTREE root, const char DIRECTIVE, PQUEUE jobs, int (*function
 
 void addToTree(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList, int socket)
 {
-	
+	//this function adds a node to btree
 	BTREE tempNode = newNode();
 	bTreeInit(tempNode,passedValue,hostnameForServerList, socket);
 	
@@ -160,6 +163,7 @@ void addToTree(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList, int
 
 int searchBtree(BTREE root, int benchData, HOSTNAME hostname, int variance, int socket, int (*functionPointer)(BTREE root, HOSTNAME hostname, int socket))
 {
+	//this function will search the btree for a specified benchmark score or node (not currently used!)
 	int minBench = (benchData - variance);
 	
 	int maxBench = (benchData + variance);
@@ -207,6 +211,7 @@ int searchBtree(BTREE root, int benchData, HOSTNAME hostname, int variance, int 
 
 int displayHostnames(BTREE root, PQUEUE jobs)
 {
+	//used to dispay the host names
 	LINK tempList = root->serverList;
 	
 	if (tempList == NULL)
@@ -228,6 +233,7 @@ int displayHostnames(BTREE root, PQUEUE jobs)
 
 int launchJobs(BTREE root, PQUEUE jobs)
 {
+	//this is used to launch jobs
 	LINK tempList = root->serverList;
 	
 	if (tempList == NULL)
@@ -289,6 +295,7 @@ int launchJobs(BTREE root, PQUEUE jobs)
 
 int addHostnameToBTree(BTREE root, HOSTNAME hostName, int socket)
 {
+	//this adds a hostname to the binary tree
 	if (root == NULL)
 	{
 		return -1;
@@ -302,10 +309,12 @@ int addHostnameToBTree(BTREE root, HOSTNAME hostName, int socket)
 
 int doNothing(BTREE root)
 {
+	//just sleeps
 	sleep(1);
 }
 
 int doNothingSearch(BTREE root, HOSTNAME hostName, int socket)
 {
+	//just sleeps
 	sleep(1);
 }

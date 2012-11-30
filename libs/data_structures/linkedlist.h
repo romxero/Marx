@@ -4,6 +4,7 @@ typedef unsigned char* HOSTNAME;
 
 struct linkedList
 {
+	//the linked list structure
 	HOSTNAME hostname;
 	int peerSocket;
 	char blacklist; //this is used to black list a server
@@ -17,6 +18,7 @@ typedef ELEMENT *LINK;
 
 void initLinkedList(LINK root, HOSTNAME var, int socket)
 {
+	//used to initialize a linked list
 	root->next = NULL;
 	root->hostname = var;
 	root->blacklist = 0;
@@ -31,6 +33,7 @@ LINK returnListElement()
 
 void addElementToList(LINK root, HOSTNAME var, int socket)
 {
+	//this function adds elements to the list
 	LINK tempNode = returnListElement();
 	tempNode->hostname = var;
 	tempNode->peerSocket = socket;
@@ -59,6 +62,7 @@ void addElementToList(LINK root, HOSTNAME var, int socket)
 
 int removeAllNodes(LINK root)
 {
+	//removes all elements in list
 	//~ LINK prevNode = returnListElement();
 	LINK tmp;
 	//~ prevNode = root;
