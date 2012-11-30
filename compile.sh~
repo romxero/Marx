@@ -1,4 +1,0 @@
-#!/bin/bash
-#This is used to compile the distributed jobn scheduling program named Marx
-#Created by Randy White
-gcc main.c -o Marx -lpthread -g
