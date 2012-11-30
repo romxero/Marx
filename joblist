@@ -1,5 +1,0 @@
-uname -rms
-date +"%r"
-date
-echo HELLO WORLD
-echo TESTING MARX SERVER
