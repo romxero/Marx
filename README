@@ -1,0 +1,4 @@
+Marx is a load-balancing distributed job scheduler that uses a binary 
+tree to load balance scheduled jobs accross a network of nodes using 
+benchmark performance number from individual nodes. Marx is created in C 
+and is expected to be highly scalable.
