@@ -12,6 +12,14 @@ jobsender : jobsender.c
 	gcc  jobsender.c -o jobsender -lpthread -lconfig -g 
 #-Wall
 
+install :
+	@echo "For installing, just copying the default configfile"
+	cp default_marxd.conf marxd.conf
+
 clean :
 	@echo "Cleanup Marxd and jobsender"
 	rm -f Marxd jobsender
+
+uninstall :
+	@echo "Cleanup Marxd and jobsender"
+	rm -f Marxd jobsender marxd.conf
