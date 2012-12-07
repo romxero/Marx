@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 								
 							}
 							
-							//~ startDaemonMode(); //start as a daemon now
+							startDaemonMode(); //start as a daemon now
 							
 							
 							struct hostent *server; //to signify the server element
@@ -168,7 +168,9 @@ int main(int argc, char **argv)
 													//Add the default values to the configuration file data structure
 												
 											}
-							//~ startDaemonMode(); //start as a daemon now
+							startDaemonMode(); //start as a daemon now
+							
+							
 							int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff	
 							static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
 							
