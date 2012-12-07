@@ -74,7 +74,9 @@ int main(int argc, char **argv)
 						}
 						else 
 						{
-							
+								
+								remove(ramDiskFile); //remove the ramdisk file before beginning
+								
 												if (processConfigFile(&configFileData,defaultConfigFile) < 0)
 												//~ if (processConfigFile(&configFileData,"marxd.conf") < 0)
 												{
@@ -97,7 +99,7 @@ int main(int argc, char **argv)
 								
 							}
 							
-							startDaemonMode(); //start as a daemon now
+							//~ startDaemonMode(); //start as a daemon now
 							
 							
 							struct hostent *server; //to signify the server element
@@ -157,6 +159,7 @@ int main(int argc, char **argv)
 					}
 					else if(strcmp(argv[1],"-s") == 0)
 					{
+						remove(ramDiskFile); //remove the ramdisk file before beginning
 						
 											if (processConfigFile(&configFileData,defaultConfigFile) < 0)
 											{
@@ -165,7 +168,7 @@ int main(int argc, char **argv)
 													//Add the default values to the configuration file data structure
 												
 											}
-							startDaemonMode(); //start as a daemon now
+							//~ startDaemonMode(); //start as a daemon now
 							int (*functionPointer)(); //this is the function pointer used for changing things in the tree stuff	
 							static	BTREE rootNode = NULL; //keep this the node name.. have it be a global variable
 							
@@ -230,6 +233,11 @@ int main(int argc, char **argv)
 										//~ pthread_create (&threads[threadCounter], NULL, (void *) &threadWrapper, (void *) &serverDataForPthreads[threadCounter]);
 										
 										
+										
+										/*This writes data to the ramdisk for scripts to parse */
+										//~ writeRamDiskFile(&jobQueue, &rootNode);
+										
+										
 										while (jobQueue.count > 0)
 										{
 											//inner loop for job queue
@@ -242,11 +250,19 @@ int main(int argc, char **argv)
 											
 											else
 											{
-												functionPointer = &launchJobs; //remove all elements
 												
-												traverseBTree(rootNode,POST_ORDER, jobQueue.head->queueElement, functionPointer);
-												pDequeue(&jobQueue); //removes the top element in priority queue
-												heartBeatProcess(&jobQueue);
+												
+												/*This dispatches all the jobs to the server */
+												dispatchJobs(&jobQueue, &rootNode); //this 
+												
+												
+												
+												
+												//~ functionPointer = &launchJobs; //remove all elements
+												//~ 
+												//~ traverseBTree(rootNode,POST_ORDER, jobQueue.head->queueElement, functionPointer);
+												//~ pDequeue(&jobQueue); //removes the top element in priority queue
+												//~ heartBeatProcess(&jobQueue);
 											}
 												
 												

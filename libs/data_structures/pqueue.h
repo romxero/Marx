@@ -291,7 +291,7 @@ void heartBeatProcess(struct priorityQueueContainer *root)
 }
 	
 	
-void heartBeat(struct priorityQueueContainer *root)
+void heartBeat(struct priorityQueueContainer *root) //deprecated
 {
 	//this increases the heartbeats
 	pQueue tempNode = root->head;

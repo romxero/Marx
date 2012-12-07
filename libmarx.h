@@ -24,6 +24,9 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+//this is a file for the ramdisk that will be helpful for scripts
+#define ramDiskFile "/dev/shm/Marx" //this is the main output file for the ramdisk
+FILE *ramDiskFileHandle; //this is the file handle for the ramdisk
 
 
 #include "libs/constant_definitions.h" //this is used for self modifying code and other things
@@ -45,10 +48,12 @@ uint peerCount = 0; //peer count
 
 
 
-
+//A few global variables here
 
 #define defaultConfigFile "marxd.conf" //this is the default configuration file for the daemon process
 
+
+//this is for the signal handling
 char terminateApp = -1; //this is used to terminate the application
 char *terminateAppPtr = &terminateApp; //this is a pointer used to terminate the application
 
@@ -59,7 +64,7 @@ void cleanUp()
 	//this voided function is for a signal handle
 	puts("Democracy is the road to socialism.\n\n Marx server/peer going down\n");
 	terminateApp = 1; //this is just used to break out of the main loop
-	
+	remove(ramDiskFile); //remove the ramdisk file before exiting
 }
 
 struct threadData
@@ -76,7 +81,7 @@ struct threadData
 
 pid_t pid, sid, cpid; // this is the pid for our daemon process
 
-void startDaemonMode(void)
+void startDaemonMode(void) //starts the daemon
 {
 	/* Daemon stuff below*/
 					pid = fork(); //fork the proceess to a child process
@@ -120,4 +125,42 @@ void startDaemonMode(void)
 					//close(STDOUT_FILENO); //standard output
 					close(STDERR_FILENO);
 					//~ 
+}
+
+
+int dispatchJobs(struct priorityQueueContainer *job_queue, BTREE *rootTreeNode)
+{
+	
+	//this is the main function that dispatches jobs
+	
+	
+		switch(job_queue->head->queueElement->directive)
+		{
+				
+				case ROUND_ROBIN:
+				{
+					
+					while(job_queue->head->queueElement->numOfElements != 0)
+					{
+						traverseBTree(*rootTreeNode,POST_ORDER, job_queue->head->queueElement, &roundRobinLaunchJobs);
+					}				
+		
+					break; 
+				}
+					
+					
+				default:
+				{
+						return -1; //this defaults to this if there is something wrong
+						break;
+				}
+		}
+		
+				//do the heartbeat and dequeue below
+		
+			pDequeue(job_queue); //removes the top element in priority queue
+			
+			heartBeatProcess(job_queue); //dont pass the address of
+		
+		return 1; //everything has worked perfectly!!
 }

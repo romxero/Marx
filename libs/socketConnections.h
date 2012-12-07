@@ -197,10 +197,7 @@ char* recieveMessage(int sockfd)
 /* These are wrapper functions for the mundane tasks */ 
 
 
-int sendAddPeer()
-{
-	
-}
+
 /* End of wrapper functions for mundane tasks */
 //REMEMBER TO ADD DEFAULTS TO switch statements!!
 
@@ -278,6 +275,21 @@ int serverFunction(int socket, BTREE *root, struct priorityQueueContainer *jobQu
 											
 										}
 									
+									
+									ramDiskFileHandle = fopen(ramDiskFile, "a"); //open the file
+									if (ramDiskFileHandle == NULL)
+									{
+										puts("Error writing to RAMDISK! No ramdisk file will be written");
+										break; //exit out of this
+										
+									}
+									char buffer[128]; //this buffer is to write strings to the output
+									int len = 0; //string length
+									len = sprintf(buffer, "Hostname : %s - Benchmark Value : %d\n",hostName,returnedBenchScore);
+									buffer[len] += '\0'; // add the terminating character
+									fputs(buffer,ramDiskFileHandle); //write lines to the file
+									
+									fclose(ramDiskFileHandle); //close the file handle
 									break;
 									}
 									case QUEUE_JOBS:

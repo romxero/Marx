@@ -318,3 +318,94 @@ int doNothingSearch(BTREE root, HOSTNAME hostName, int socket)
 	//just sleeps
 	sleep(1);
 }
+
+
+
+int roundRobinLaunchJobs(BTREE root, PQUEUE jobs)
+{
+	//this is used to launch jobs
+	LINK tempList = root->serverList;
+	
+	if (tempList == NULL)
+	{
+		return -1;
+	}
+	else
+	{
+		
+				int sendVar = SEND_JOB;
+				int *sendVarPtr = &sendVar;
+				
+				int recieveVar = ZERO_OUT_VALUE;
+				int *recieveVarPtr = &recieveVar;
+				
+				int errorTrap = 0;
+				
+				
+			while(tempList != NULL)
+			{
+				
+				send(tempList->peerSocket,sendVarPtr,sizeof(int),0);
+			
+				sendMessage(tempList->peerSocket,jobs->head->value); //this is the command
+				
+				errorTrap = recv(tempList->peerSocket,recieveVarPtr,sizeof(int),0);
+				if (errorTrap < 0)
+				{
+				//do nothing	
+					
+				}
+				
+				if (recieveVar == RECIEVED_OK) //everything recieved ok
+				{
+					
+					
+						dequeue(jobs); //dequeue the job off of the queue
+						
+						tempList = tempList->next; //goto next server
+					
+				}
+				
+				
+				
+			}
+			
+			
+	}
+			
+			return 1; //if things made it here then everything is ok
+			
+}
+
+
+int writeDataToRamDisk(BTREE root, PQUEUE jobs)
+{
+	//used to dispay the host names
+	LINK tempList = root->serverList;
+	char buffer[128]; //this buffer is to write strings to the output
+	int len = 0;
+	if (tempList == NULL)
+	{
+		return -1; //there is nothing in the list
+	}
+	else
+	{
+		ramDiskFileHandle = fopen(ramDiskFile, "a"); //open the file
+		
+		
+			while(tempList != NULL)
+			{
+				
+				len = sprintf(buffer, "Benchmark Value : %d\n Hostname : %s\n",root->benchscore,tempList->hostname);
+				buffer[len] += '\0'; // add the terminating character
+				fputs(buffer,ramDiskFileHandle); //write lines to the file
+				tempList = tempList->next; //go forware in the list
+				
+			}
+			
+				
+				
+				fclose(ramDiskFileHandle); //close the file handle
+	}
+	
+}
