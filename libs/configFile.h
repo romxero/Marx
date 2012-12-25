@@ -151,3 +151,6 @@ int writeBenchScoreToConfig(struct configurationFile *config, char const *filePa
 					        
 					        return 1; //things are sane here
 }
+
+
+//eventually add a live file here

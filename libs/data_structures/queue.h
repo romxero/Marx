@@ -96,6 +96,7 @@ int dequeue(QUEUE *root)
 
 char* peek(QUEUE *root)
 {
+	//deprecated
 	//peek at the top of the queue
 	if (root->head != NULL)
 	{

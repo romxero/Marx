@@ -53,7 +53,7 @@ void setChessBoard(int N, char chessBoard[N][N])
 	}
 }
 
-
+//these should be static functions
 int queenP(int N, char chessBoard[N][N], int count, int *externalCounter)
 {
 	 if (count == N)

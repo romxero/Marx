@@ -46,6 +46,7 @@ void bTreeInit(BTREE root, DATA passedValue, HOSTNAME hostnameForServerList, int
 
 void releaseBTreeData(BTREE root)
 {	
+	//deprecated
 	free(root->serverList); //release 
 	free(root); //free
 }
